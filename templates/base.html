@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Community Delivery Network{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="nav-brand">Community Delivery</a>
+            
+            <div class="nav-links">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.is_admin %}
+                        <a href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a>
+                        <a href="{{ url_for('admin.volunteer_list', status='pending') }}">Review Volunteers</a>
+                    {% elif current_user.is_volunteer %}
+                        <a href="{{ url_for('volunteer.dashboard') }}">Dashboard</a>
+                        <a href="{{ url_for('volunteer.settings') }}">Settings</a>
+                    {% elif current_user.is_recipient %}
+                        <a href="{{ url_for('recipient.dashboard') }}">Dashboard</a>
+                        <a href="{{ url_for('recipient.request_new') }}">New Request</a>
+                        <a href="{{ url_for('recipient.settings') }}">Settings</a>
+                    {% endif %}
+                    <span class="nav-user">{{ current_user.display_name }}</span>
+                    <a href="{{ url_for('auth.logout') }}">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}">Login</a>
+                    <a href="{{ url_for('auth.register') }}">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}">
+                            {{ message }}
+                            <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </main>
+    
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; {{ now().year if now is defined else '2025' }} Community Delivery Network. 
+               Built with care for our community.</p>
+        </div>
+    </footer>
+    
+    <script src="{{ url_for('static', filename='js/forms.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

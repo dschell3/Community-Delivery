@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Account - Community Delivery Network{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h1 style="color: var(--error-color);">Delete Account</h1>
+        
+        <div class="alert alert-warning">
+            <strong>Warning:</strong> This action cannot be undone.
+        </div>
+        
+        <p>Deleting your account will:</p>
+        <ul style="margin-left: 1.5rem; margin-bottom: 1.5rem;">
+            <li>Cancel any active delivery requests</li>
+            <li>Remove your address and contact information</li>
+            <li>Keep anonymized records for safety purposes</li>
+        </ul>
+        
+        <form method="POST" class="form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="form-group">
+                <label for="confirm">Type DELETE to confirm <span class="required">*</span></label>
+                <input type="text" id="confirm" name="confirm" required 
+                       placeholder="DELETE" autocomplete="off">
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block" style="background: var(--error-color);">
+                Delete My Account
+            </button>
+        </form>
+        
+        <div class="auth-footer">
+            <p><a href="{{ url_for('recipient.settings') }}">← Cancel, go back to settings</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

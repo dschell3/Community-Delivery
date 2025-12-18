@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Community Delivery Network{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card auth-card-wide">
+        <h1>Join Our Community</h1>
+        <p class="text-center">How would you like to participate?</p>
+        
+        <div class="role-selection">
+            <a href="{{ url_for('auth.register_recipient') }}" class="role-card">
+                <div class="role-icon">🏠</div>
+                <h3>I Need Help</h3>
+                <p>Register to request grocery deliveries from volunteers in your area.</p>
+                <span class="btn btn-primary">Register as Recipient</span>
+            </a>
+            
+            <a href="{{ url_for('volunteer.apply') }}" class="role-card">
+                <div class="role-icon">🤝</div>
+                <h3>I Want to Help</h3>
+                <p>Apply to become a volunteer and help deliver groceries to neighbors.</p>
+                <span class="btn btn-secondary">Apply as Volunteer</span>
+            </a>
+        </div>
+        
+        <div class="auth-footer">
+            <p>Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

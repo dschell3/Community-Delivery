@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Community Delivery Network - Connecting Neighbors{% endblock %}
+
+{% block content %}
+<div class="landing">
+    <section class="hero">
+        <h1>Community Delivery Network</h1>
+        <p class="hero-subtitle">Connecting neighbors to help each other with grocery delivery</p>
+        
+        <div class="hero-actions">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-large">Get Started</a>
+            <a href="#how-it-works" class="btn btn-secondary btn-large">Learn More</a>
+        </div>
+    </section>
+    
+    <section id="how-it-works" class="section">
+        <h2>How It Works</h2>
+        
+        <div class="feature-grid">
+            <div class="feature">
+                <div class="feature-icon">🛒</div>
+                <h3>For Those Who Need Help</h3>
+                <p>Place your grocery order at your preferred store with the pickup option. 
+                   Then post a request here with the pickup details. A volunteer will pick it up 
+                   and deliver it to your door.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🤝</div>
+                <h3>For Volunteers</h3>
+                <p>Sign up to help your neighbors. Browse available delivery requests in your area, 
+                   claim one that fits your schedule, pick up the groceries, and deliver them.</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🔒</div>
+                <h3>Safe & Private</h3>
+                <p>Your personal information is protected. Volunteers are vetted before approval. 
+                   Addresses are only shared when necessary and communication happens through the app.</p>
+            </div>
+        </div>
+    </section>
+    
+    <section class="section section-alt">
+        <h2>No Fees, No Hassle</h2>
+        <p>This platform is free for everyone. You pay for your groceries at the store (pickup option). 
+           We just help coordinate the delivery from volunteers in your community.</p>
+    </section>
+    
+    <section class="section">
+        <h2>Ready to Join?</h2>
+        <div class="cta-grid">
+            <div class="cta-card">
+                <h3>Need Groceries Delivered?</h3>
+                <p>Register as a recipient to start posting delivery requests.</p>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Sign Up</a>
+            </div>
+            
+            <div class="cta-card">
+                <h3>Want to Help?</h3>
+                <p>Apply to become a volunteer and help your neighbors.</p>
+                <a href="{{ url_for('volunteer.apply') }}" class="btn btn-secondary">Volunteer</a>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Community Delivery Network{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1>Welcome, {{ current_user.display_name }}</h1>
+        <a href="{{ url_for('recipient.request_new') }}" class="btn btn-primary">New Delivery Request</a>
+    </div>
+    
+    {% if active_deliveries %}
+    <section class="dashboard-section">
+        <h2>Active Requests</h2>
+        <div class="delivery-list">
+            {% for delivery in active_deliveries %}
+            <div class="delivery-card delivery-{{ delivery.status }}">
+                <div class="delivery-header">
+                    <h3>{{ delivery.store_name }}</h3>
+                    <span class="status-badge status-{{ delivery.status }}">{{ delivery.status | title }}</span>
+                </div>
+                
+                <div class="delivery-details">
+                    <p><strong>Pickup:</strong> {{ delivery.pickup_time.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                    <p><strong>Order Name:</strong> {{ delivery.order_name }}</p>
+                    {% if delivery.estimated_items %}
+                    <p><strong>Items:</strong> {{ delivery.estimated_items }}</p>
+                    {% endif %}
+                </div>
+                
+                {% if delivery.volunteer %}
+                <div class="volunteer-info">
+                    <p><strong>Volunteer:</strong> {{ delivery.volunteer.full_name }}</p>
+                    {% if delivery.status == 'picked_up' %}
+                    <p class="text-success">✓ Groceries picked up - on the way!</p>
+                    {% endif %}
+                </div>
+                {% else %}
+                <p class="text-muted">Waiting for a volunteer...</p>
+                {% endif %}
+                
+                <div class="delivery-actions">
+                    <a href="{{ url_for('recipient.request_detail', id=delivery.id) }}" class="btn btn-secondary">
+                        View Details
+                        {% if delivery.volunteer %}/ Message{% endif %}
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% else %}
+    <section class="dashboard-section">
+        <div class="empty-state">
+            <p>You don't have any active delivery requests.</p>
+            <a href="{{ url_for('recipient.request_new') }}" class="btn btn-primary">Create a Request</a>
+        </div>
+    </section>
+    {% endif %}
+    
+    {% if past_deliveries %}
+    <section class="dashboard-section">
+        <h2>Recent Deliveries</h2>
+        <div class="delivery-list">
+            {% for delivery in past_deliveries %}
+            <div class="delivery-card delivery-{{ delivery.status }}">
+                <div class="delivery-header">
+                    <h3>{{ delivery.store_name }}</h3>
+                    <span class="status-badge status-{{ delivery.status }}">{{ delivery.status | title }}</span>
+                </div>
+                
+                <div class="delivery-details">
+                    <p><strong>Date:</strong> {{ (delivery.completed_at or delivery.canceled_at or delivery.created_at).strftime('%B %d, %Y') }}</p>
+                    {% if delivery.volunteer %}
+                    <p><strong>Volunteer:</strong> {{ delivery.volunteer.full_name }}</p>
+                    {% endif %}
+                </div>
+                
+                {% if delivery.status == 'completed' and not delivery.rating %}
+                <div class="delivery-actions">
+                    <a href="{{ url_for('recipient.request_complete', id=delivery.id) }}" class="btn btn-primary">
+                        Leave Rating
+                    </a>
+                </div>
+                {% elif delivery.rating %}
+                <p class="text-muted">Rated: {{ '★' * delivery.rating.score }}{{ '☆' * (5 - delivery.rating.score) }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

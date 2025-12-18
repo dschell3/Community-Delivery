@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Delivery Details - Community Delivery Network{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin-top: 1.5rem;
+    }
+    
+    .chat-header {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .chat-messages {
+        height: 300px;
+        overflow-y: auto;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .message {
+        max-width: 80%;
+        padding: 0.75rem;
+        border-radius: var(--radius);
+    }
+    
+    .message-sent {
+        align-self: flex-end;
+        background: var(--primary-color);
+        color: white;
+    }
+    
+    .message-received {
+        align-self: flex-start;
+        background: var(--background);
+    }
+    
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        font-size: 0.75rem;
+        opacity: 0.8;
+        margin-bottom: 0.25rem;
+    }
+    
+    .chat-input {
+        padding: 1rem;
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .chat-input input {
+        flex: 1;
+        padding: 0.625rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+    }
+    
+    .address-card {
+        background: #ecfdf5;
+        border: 1px solid #6ee7b7;
+        border-radius: var(--radius);
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .address-card h4 {
+        color: #047857;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1>Delivery Details</h1>
+        <span class="status-badge status-{{ delivery.status }}">{{ delivery.status | replace('_', ' ') | title }}</span>
+    </div>
+    
+    <div class="delivery-card">
+        <h3>Pickup Information</h3>
+        <div class="delivery-details">
+            <p><strong>Store:</strong> {{ delivery.store_name }}</p>
+            <p><strong>Store Address:</strong> {{ delivery.pickup_address }}</p>
+            <p><strong>Order Name:</strong> {{ delivery.order_name }}</p>
+            <p><strong>Pickup Time:</strong> {{ delivery.pickup_time.strftime('%B %d, %Y at %I:%M %p') }}</p>
+            {% if delivery.estimated_items %}
+            <p><strong>Estimated Items:</strong> {{ delivery.estimated_items }}</p>
+            {% endif %}
+        </div>
+        
+        {% if is_my_delivery and address_info %}
+        <div class="address-card">
+            <h4>🏠 Delivery Address</h4>
+            <p><strong>Recipient:</strong> {{ address_info.display_name }}</p>
+            <p><strong>Address:</strong> {{ address_info.address }}</p>
+            {% if address_info.notes %}
+            <p><strong>Notes:</strong> {{ address_info.notes }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <div class="delivery-actions" style="margin-top: 1.5rem;">
+            {% if delivery.status == 'open' %}
+                <form method="POST" action="{{ url_for('volunteer.request_claim', id=delivery.id) }}" class="inline-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-primary">Claim This Delivery</button>
+                </form>
+            {% elif is_my_delivery %}
+                {% if delivery.status == 'claimed' %}
+                    <form method="POST" action="{{ url_for('volunteer.request_pickup', id=delivery.id) }}" class="inline-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-primary">Mark as Picked Up</button>
+                    </form>
+                {% elif delivery.status == 'picked_up' %}
+                    <form method="POST" action="{{ url_for('volunteer.request_complete', id=delivery.id) }}" class="inline-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-primary">Mark as Delivered</button>
+                    </form>
+                {% endif %}
+                
+                {% if delivery.status in ['claimed', 'picked_up'] %}
+                <form method="POST" action="{{ url_for('volunteer.request_release', id=delivery.id) }}" 
+                      class="inline-form" data-confirm="Are you sure you want to release this delivery?">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-secondary">Release Delivery</button>
+                </form>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if is_my_delivery and delivery.status in ['claimed', 'picked_up'] %}
+    <div class="chat-container">
+        <div class="chat-header">
+            <h3>Message {{ delivery.recipient.display_name }}</h3>
+        </div>
+        
+        <div class="chat-messages" id="messages" data-delivery-id="{{ delivery.id }}">
+            {% if messages %}
+                {% for msg in messages %}
+                <div class="message {{ 'message-sent' if msg.sender_id == current_user.id else 'message-received' }}"
+                     data-message-id="{{ msg.id }}">
+                    <div class="message-header">
+                        <span class="message-sender">{{ msg.sender.display_name }}</span>
+                        <span class="message-time">{{ msg.sent_at.strftime('%I:%M %p') }}</span>
+                    </div>
+                    <div class="message-content">{{ msg.content }}</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                    <p>No messages yet. Send a message to coordinate with the recipient.</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <form class="chat-input" id="message-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="text" id="message-input" placeholder="Type a message..." maxlength="1000" autocomplete="off">
+            <button type="submit" id="send-button" class="btn btn-primary">Send</button>
+        </form>
+    </div>
+    {% endif %}
+    
+    <div style="margin-top: 1.5rem;">
+        <a href="{{ url_for('volunteer.dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+</div>
+
+<script>
+    window.currentUserId = {{ current_user.id }};
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/messages.js') }}"></script>
+{% endblock %}

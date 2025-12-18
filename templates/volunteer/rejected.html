@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Application Rejected - Community Delivery Network{% endblock %}
+
+{% block content %}
+<div class="status-container">
+    <div class="status-card">
+        <div class="status-icon">❌</div>
+        <h1>Application Not Approved</h1>
+        <p>We're sorry, but your volunteer application was not approved at this time.</p>
+        
+        {% if volunteer.rejection_reason %}
+        <div class="status-details">
+            <h3>Reason</h3>
+            <p>{{ volunteer.rejection_reason }}</p>
+        </div>
+        {% endif %}
+        
+        <p class="text-muted">If you believe this was a mistake or have questions, please contact the organization administrator.</p>
+        
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary">Logout</a>
+    </div>
+</div>
+{% endblock %}

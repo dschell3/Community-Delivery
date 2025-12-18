@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Volunteer Dashboard - Community Delivery Network{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1>Welcome, {{ volunteer.full_name }}</h1>
+        <div class="volunteer-stats">
+            <span class="stat">
+                <strong>{{ volunteer.total_deliveries }}</strong> deliveries completed
+            </span>
+            {% if volunteer.average_rating %}
+            <span class="stat">
+                <strong>{{ "%.1f"|format(volunteer.average_rating) }}</strong> ★ average rating
+            </span>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if active_deliveries %}
+    <section class="dashboard-section">
+        <h2>Your Active Deliveries</h2>
+        <div class="delivery-list">
+            {% for delivery in active_deliveries %}
+            <div class="delivery-card delivery-{{ delivery.status }}">
+                <div class="delivery-header">
+                    <h3>{{ delivery.store_name }}</h3>
+                    <span class="status-badge status-{{ delivery.status }}">{{ delivery.status | replace('_', ' ') | title }}</span>
+                </div>
+                
+                <div class="delivery-details">
+                    <p><strong>Pickup:</strong> {{ delivery.pickup_time.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                    <p><strong>Store Address:</strong> {{ delivery.pickup_address }}</p>
+                    <p><strong>Order Name:</strong> {{ delivery.order_name }}</p>
+                    {% if delivery.estimated_items %}
+                    <p><strong>Items:</strong> {{ delivery.estimated_items }}</p>
+                    {% endif %}
+                    <p><strong>Recipient:</strong> {{ delivery.recipient.display_name }}</p>
+                </div>
+                
+                <div class="delivery-actions">
+                    <a href="{{ url_for('volunteer.request_detail', id=delivery.id) }}" class="btn btn-primary">
+                        View Details / Deliver
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    
+    <section class="dashboard-section">
+        <h2>Available Deliveries</h2>
+        
+        {% if not can_claim %}
+        <div class="alert alert-warning">
+            You have reached the maximum of {{ max_claims }} active deliveries. 
+            Complete or release a delivery to claim more.
+        </div>
+        {% endif %}
+        
+        {% if available_deliveries %}
+        <div class="delivery-list">
+            {% for delivery in available_deliveries %}
+            <div class="delivery-card">
+                <div class="delivery-header">
+                    <h3>{{ delivery.store_name }}</h3>
+                    {% if delivery.recipient.general_area %}
+                    <span class="area-badge">{{ delivery.recipient.general_area }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="delivery-details">
+                    <p><strong>Pickup:</strong> {{ delivery.pickup_time.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                    <p><strong>Store Address:</strong> {{ delivery.pickup_address }}</p>
+                    {% if delivery.estimated_items %}
+                    <p><strong>Items:</strong> {{ delivery.estimated_items }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="delivery-actions">
+                    <a href="{{ url_for('volunteer.request_detail', id=delivery.id) }}" class="btn btn-secondary">View Details</a>
+                    {% if can_claim %}
+                    <form method="POST" action="{{ url_for('volunteer.request_claim', id=delivery.id) }}" class="inline-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-primary">Claim Delivery</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No deliveries available in your service area right now. Check back later!</p>
+        </div>
+        {% endif %}
+    </section>
+    
+    {% if completed_deliveries %}
+    <section class="dashboard-section">
+        <h2>Recent Completions</h2>
+        <div class="delivery-list delivery-list-compact">
+            {% for delivery in completed_deliveries %}
+            <div class="delivery-card delivery-completed">
+                <div class="delivery-header">
+                    <h3>{{ delivery.store_name }}</h3>
+                    <span class="text-muted">{{ delivery.completed_at.strftime('%b %d') }}</span>
+                </div>
+                {% if delivery.rating %}
+                <p>{{ '★' * delivery.rating.score }}{{ '☆' * (5 - delivery.rating.score) }}
+                   {% if delivery.rating.comment %}<small class="text-muted">- "{{ delivery.rating.comment[:50] }}{% if delivery.rating.comment|length > 50 %}...{% endif %}"</small>{% endif %}
+                </p>
+                {% else %}
+                <p class="text-muted">Awaiting rating</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

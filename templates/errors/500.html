@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - Community Delivery Network{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-card">
+        <h1>500</h1>
+        <h2>Something Went Wrong</h2>
+        <p>We're sorry, but something went wrong on our end. Please try again later.</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Go Home</a>
+    </div>
+</div>
+{% endblock %}

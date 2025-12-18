@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Account Suspended - Community Delivery Network{% endblock %}
+
+{% block content %}
+<div class="status-container">
+    <div class="status-card">
+        <div class="status-icon">⚠️</div>
+        <h1>Account Suspended</h1>
+        <p>Your volunteer account has been suspended.</p>
+        
+        {% if volunteer.suspension_reason %}
+        <div class="status-details">
+            <h3>Reason</h3>
+            <p>{{ volunteer.suspension_reason }}</p>
+        </div>
+        {% endif %}
+        
+        <p class="text-muted">If you have questions about this suspension, please contact the organization administrator.</p>
+        
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary">Logout</a>
+    </div>
+</div>
+{% endblock %}

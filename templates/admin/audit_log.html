@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Log - Community Delivery Network{% endblock %}
+
+{% block content %}
+<div class="dashboard admin-dashboard">
+    <div class="dashboard-header">
+        <h1>Audit Log</h1>
+    </div>
+    
+    <div class="delivery-card" style="margin-bottom: 1.5rem;">
+        <h3>Filters</h3>
+        <form method="GET" class="form" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+            <div class="form-group" style="margin: 0;">
+                <label for="action">Action Type</label>
+                <select id="action" name="action">
+                    <option value="">All Actions</option>
+                    {% for action_type in action_types %}
+                    <option value="{{ action_type }}" {{ 'selected' if current_action == action_type else '' }}>
+                        {{ action_type | replace('_', ' ') | title }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group" style="margin: 0;">
+                <label for="volunteer_id">Volunteer ID</label>
+                <input type="number" id="volunteer_id" name="volunteer_id" 
+                       value="{{ current_volunteer_id or '' }}" placeholder="Any">
+            </div>
+            
+            <div class="form-group" style="margin: 0;">
+                <label for="recipient_id">Recipient ID</label>
+                <input type="number" id="recipient_id" name="recipient_id" 
+                       value="{{ current_recipient_id or '' }}" placeholder="Any">
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a href="{{ url_for('admin.audit_log') }}" class="btn btn-secondary">Clear</a>
+        </form>
+    </div>
+    
+    {% if entries %}
+    <div class="activity-list">
+        {% for entry in entries %}
+        <div class="activity-item">
+            <span class="activity-action">{{ entry.action | replace('_', ' ') | title }}</span>
+            <span class="activity-time">{{ entry.timestamp.strftime('%b %d, %Y %I:%M %p') }}</span>
+            
+            {% if entry.volunteer_id %}
+            <a href="{{ url_for('admin.volunteer_detail', id=entry.volunteer_id) }}" class="activity-link">
+                Volunteer #{{ entry.volunteer_id }}
+            </a>
+            {% endif %}
+            
+            {% if entry.recipient_id %}
+            <a href="{{ url_for('admin.recipient_detail', id=entry.recipient_id) }}" class="activity-link">
+                Recipient #{{ entry.recipient_id }}
+            </a>
+            {% endif %}
+            
+            {% if entry.delivery_id %}
+            <span class="activity-detail">Delivery #{{ entry.delivery_id }}</span>
+            {% endif %}
+            
+            {% if entry.admin_id %}
+            <span class="activity-detail">Admin #{{ entry.admin_id }}</span>
+            {% endif %}
+            
+            {% if entry.ip_address %}
+            <span class="activity-detail text-muted">{{ entry.ip_address }}</span>
+            {% endif %}
+            
+            {% if entry.details %}
+            <span class="activity-detail text-muted">{{ entry.details }}</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>No audit entries found with these filters.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

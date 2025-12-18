@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Community Delivery Network{% endblock %}
+
+{% block content %}
+<div class="dashboard admin-dashboard">
+    <h1>Admin Dashboard</h1>
+    
+    <div class="stats-grid">
+        <div class="stat-card {% if pending_volunteers > 0 %}stat-alert{% endif %}">
+            <div class="stat-number">{{ pending_volunteers }}</div>
+            <div class="stat-label">Pending Applications</div>
+            {% if pending_volunteers > 0 %}
+            <a href="{{ url_for('admin.volunteer_list', status='pending') }}" class="btn btn-small btn-primary">Review</a>
+            {% endif %}
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ open_deliveries }}</div>
+            <div class="stat-label">Open Deliveries</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ active_deliveries }}</div>
+            <div class="stat-label">Active Deliveries</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ total_volunteers }}</div>
+            <div class="stat-label">Active Volunteers</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ total_recipients }}</div>
+            <div class="stat-label">Recipients</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ completed_deliveries }}</div>
+            <div class="stat-label">Completed Deliveries</div>
+        </div>
+    </div>
+    
+    <div class="dashboard-row">
+        <section class="dashboard-section">
+            <div class="section-header">
+                <h2>Quick Actions</h2>
+            </div>
+            <div class="action-buttons">
+                <a href="{{ url_for('admin.volunteer_list', status='pending') }}" class="btn btn-primary">
+                    Review Volunteers ({{ pending_volunteers }})
+                </a>
+                <a href="{{ url_for('admin.volunteer_list') }}" class="btn btn-secondary">
+                    Manage Volunteers
+                </a>
+                <a href="{{ url_for('admin.audit_log') }}" class="btn btn-secondary">
+                    View Audit Log
+                </a>
+            </div>
+        </section>
+    </div>
+    
+    <section class="dashboard-section">
+        <div class="section-header">
+            <h2>Recent Activity</h2>
+            <a href="{{ url_for('admin.audit_log') }}" class="btn btn-small btn-secondary">View All</a>
+        </div>
+        
+        <div class="activity-list">
+            {% for entry in recent_activity %}
+            <div class="activity-item">
+                <span class="activity-action">{{ entry.action | replace('_', ' ') | title }}</span>
+                <span class="activity-time">{{ entry.timestamp.strftime('%b %d, %I:%M %p') }}</span>
+                {% if entry.volunteer_id %}
+                <a href="{{ url_for('admin.volunteer_detail', id=entry.volunteer_id) }}" class="activity-link">
+                    Volunteer #{{ entry.volunteer_id }}
+                </a>
+                {% endif %}
+                {% if entry.delivery_id %}
+                <span class="activity-detail">Delivery #{{ entry.delivery_id }}</span>
+                {% endif %}
+            </div>
+            {% else %}
+            <p class="text-muted">No recent activity.</p>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

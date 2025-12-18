@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}New Delivery Request - Community Delivery Network{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h1>Request a Delivery</h1>
+        <p class="text-muted">Enter the details of your grocery order pickup.</p>
+        
+        <form method="POST" class="form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <h3>Store Information</h3>
+            
+            <div class="form-group">
+                <label for="store_name">Store Name <span class="required">*</span></label>
+                <input type="text" id="store_name" name="store_name" required 
+                       placeholder="e.g., Safeway, Walmart, Target">
+            </div>
+            
+            <div class="form-group">
+                <label for="pickup_address">Store Address <span class="required">*</span></label>
+                <input type="text" id="pickup_address" name="pickup_address" required 
+                       placeholder="Full address of the store">
+                <small>This is where the volunteer will pick up your order.</small>
+            </div>
+            
+            <h3>Order Details</h3>
+            
+            <div class="form-group">
+                <label for="order_name">Order Name <span class="required">*</span></label>
+                <input type="text" id="order_name" name="order_name" required 
+                       placeholder="Name the order is under">
+                <small>The name the store has for your pickup order.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="pickup_time">Pickup Ready Time <span class="required">*</span></label>
+                <input type="datetime-local" id="pickup_time" name="pickup_time" required>
+                <small>When will your order be ready for pickup?</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="estimated_items">Estimated Size (Optional)</label>
+                <input type="text" id="estimated_items" name="estimated_items" 
+                       placeholder="e.g., About 10 items, 2 bags, small order">
+                <small>Helps volunteers plan their trip.</small>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">Submit Request</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p><a href="{{ url_for('recipient.dashboard') }}">← Back to Dashboard</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

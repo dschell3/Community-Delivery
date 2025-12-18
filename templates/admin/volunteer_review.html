@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Review Application - Community Delivery Network{% endblock %}
+
+{% block content %}
+<div class="dashboard admin-dashboard">
+    <div class="dashboard-header">
+        <h1>Review Volunteer Application</h1>
+    </div>
+    
+    <div class="delivery-card">
+        <h3>Applicant Information</h3>
+        <div class="delivery-details">
+            <p><strong>Name:</strong> {{ volunteer.full_name }}</p>
+            <p><strong>Email:</strong> {{ volunteer.user.email }}</p>
+            <p><strong>Service Area:</strong> {{ volunteer.service_area }}</p>
+            {% if volunteer.availability_notes %}
+            <p><strong>Availability:</strong> {{ volunteer.availability_notes }}</p>
+            {% endif %}
+            <p><strong>Applied:</strong> {{ volunteer.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+            <p><strong>Attestation:</strong> 
+                {% if volunteer.attestation_completed %}
+                <span class="text-success">✓ Confirmed not affiliated with law enforcement</span>
+                {% else %}
+                <span class="text-error">✗ Not completed</span>
+                {% endif %}
+            </p>
+        </div>
+        
+        {% if volunteer.photo_path %}
+        <div style="margin-top: 1rem;">
+            <h4>Profile Photo</h4>
+            <img src="{{ url_for('static', filename=volunteer.photo_path.replace('uploads/', '')) }}" 
+                 alt="Profile photo" style="max-width: 200px; border-radius: var(--radius);">
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if id_upload %}
+    <div class="delivery-card" style="border-color: var(--warning-color);">
+        <h3>ID Verification</h3>
+        <p class="text-muted">Review the ID to verify the applicant's identity. This image will be deleted after your decision.</p>
+        
+        <div style="margin: 1rem 0;">
+            <img src="{{ url_for('static', filename=id_upload.file_path.replace('uploads/', '')) }}" 
+                 alt="ID photo" style="max-width: 400px; border: 1px solid var(--border); border-radius: var(--radius);">
+        </div>
+        
+        <p class="text-muted"><strong>Expires:</strong> {{ id_upload.expires_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+        <strong>Warning:</strong> No ID photo found for this applicant. The upload may have expired.
+    </div>
+    {% endif %}
+    
+    <div class="delivery-card">
+        <h3>Decision</h3>
+        
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+            <form method="POST" action="{{ url_for('admin.volunteer_approve', id=volunteer.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-primary">✓ Approve Volunteer</button>
+            </form>
+        </div>
+        
+        <form method="POST" action="{{ url_for('admin.volunteer_reject', id=volunteer.id) }}" class="form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="form-group">
+                <label for="reason">Rejection Reason (Optional)</label>
+                <textarea id="reason" name="reason" rows="2" 
+                          placeholder="Provide a reason if rejecting..."></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-secondary">✗ Reject Application</button>
+        </form>
+    </div>
+    
+    <div style="margin-top: 1.5rem;">
+        <a href="{{ url_for('admin.volunteer_list', status='pending') }}" class="btn btn-secondary">← Back to Pending Applications</a>
+    </div>
+</div>
+{% endblock %}

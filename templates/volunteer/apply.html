@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Volunteer Application - Community Delivery Network{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h1>Volunteer Application</h1>
+        <p class="text-muted">Thank you for wanting to help! Please complete this application. 
+           An admin will review it and verify your ID before approval.</p>
+        
+        <form method="POST" enctype="multipart/form-data" class="form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <h3>Account Information</h3>
+            
+            <div class="form-group">
+                <label for="email">Email <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required 
+                       placeholder="your@email.com" autocomplete="email">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">Password <span class="required">*</span></label>
+                    <input type="password" id="password" name="password" required 
+                           placeholder="At least 8 characters" autocomplete="new-password"
+                           minlength="8">
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password <span class="required">*</span></label>
+                    <input type="password" id="confirm_password" name="confirm_password" required 
+                           placeholder="Confirm your password" autocomplete="new-password">
+                </div>
+            </div>
+            
+            <h3>Volunteer Profile</h3>
+            
+            <div class="form-group">
+                <label for="full_name">Full Name <span class="required">*</span></label>
+                <input type="text" id="full_name" name="full_name" required 
+                       placeholder="Your full name">
+                <small>This will be shown to recipients.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="photo">Profile Photo <span class="required">*</span></label>
+                <input type="file" id="photo" name="photo" required 
+                       accept="image/png,image/jpeg,image/jpg">
+                <small>A clear photo of yourself. This helps recipients identify you.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="service_area">Service Area <span class="required">*</span></label>
+                <input type="text" id="service_area" name="service_area" required 
+                       placeholder="e.g., North Sacramento, Midtown, Downtown">
+                <small>Areas where you're willing to make deliveries.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="availability_notes">Availability</label>
+                <textarea id="availability_notes" name="availability_notes" rows="2"
+                          placeholder="e.g., Weekends, Evenings after 6pm"></textarea>
+            </div>
+            
+            <h3>Identity Verification</h3>
+            
+            <div class="form-group">
+                <label for="id_photo">Photo of Government ID <span class="required">*</span></label>
+                <input type="file" id="id_photo" name="id_photo" required 
+                       accept="image/png,image/jpeg,image/jpg">
+                <small>Driver's license, state ID, or passport. 
+                       This is reviewed by an admin and then deleted - it is not stored long-term.</small>
+            </div>
+            
+            <div class="form-group">
+                <div class="attestation-box">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="attestation" required>
+                        <span>I confirm that I am not currently employed by or affiliated with 
+                              any law enforcement agency, immigration enforcement agency (including ICE, CBP), 
+                              or any organization that conducts immigration enforcement activities. 
+                              I understand that providing false information may result in removal from the platform.</span>
+                    </label>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">Submit Application</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

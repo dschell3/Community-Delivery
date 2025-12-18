@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Community Delivery Network{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h1>Settings</h1>
+        
+        <form method="POST" class="form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <h3>Profile</h3>
+            
+            <div class="form-group">
+                <label for="display_name">Display Name <span class="required">*</span></label>
+                <input type="text" id="display_name" name="display_name" required 
+                       value="{{ recipient.display_name }}"
+                       placeholder="First name or nickname">
+                <small>This is what volunteers will see.</small>
+            </div>
+            
+            <h3>Delivery Information</h3>
+            
+            <div class="form-group">
+                <label for="address">Delivery Address <span class="required">*</span></label>
+                <textarea id="address" name="address" required rows="2"
+                          placeholder="Full delivery address">{{ current_address or '' }}</textarea>
+                <small>This is encrypted and only shared with your assigned volunteer.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="general_area">General Area</label>
+                <input type="text" id="general_area" name="general_area" 
+                       value="{{ recipient.general_area or '' }}"
+                       placeholder="e.g., North Sacramento, Midtown">
+                <small>Helps volunteers find requests in their area.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone Number (Optional)</label>
+                <input type="tel" id="phone" name="phone" 
+                       value="{{ current_phone or '' }}"
+                       placeholder="For urgent coordination">
+                <small>Encrypted. Only used if in-app messaging isn't working.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="notes">Delivery Notes (Optional)</label>
+                <textarea id="notes" name="notes" rows="2"
+                          placeholder="Gate code, apartment number, special instructions">{{ current_notes or '' }}</textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+        </form>
+        
+        <div class="auth-footer" style="border-top-color: var(--error-color);">
+            <h4 style="color: var(--error-color);">Danger Zone</h4>
+            <p>Want to delete your account? This will cancel any active deliveries and remove your data.</p>
+            <a href="{{ url_for('recipient.delete_account') }}" class="btn btn-secondary">Delete Account</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

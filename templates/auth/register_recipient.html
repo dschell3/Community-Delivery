@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Register as Recipient - Community Delivery Network{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h1>Register for Deliveries</h1>
+        <p class="text-muted">Your information is encrypted and only shared with volunteers when necessary.</p>
+        
+        <form method="POST" class="form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <h3>Account Information</h3>
+            
+            <div class="form-group">
+                <label for="email">Email <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required 
+                       placeholder="your@email.com" autocomplete="email">
+                <small>Used for login and notifications</small>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">Password <span class="required">*</span></label>
+                    <input type="password" id="password" name="password" required 
+                           placeholder="At least 8 characters" autocomplete="new-password"
+                           minlength="8">
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password <span class="required">*</span></label>
+                    <input type="password" id="confirm_password" name="confirm_password" required 
+                           placeholder="Confirm your password" autocomplete="new-password">
+                </div>
+            </div>
+            
+            <h3>Delivery Information</h3>
+            
+            <div class="form-group">
+                <label for="display_name">Display Name <span class="required">*</span></label>
+                <input type="text" id="display_name" name="display_name" required 
+                       placeholder="First name or nickname">
+                <small>This is what volunteers will see. You don't need to use your real name.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="address">Delivery Address <span class="required">*</span></label>
+                <textarea id="address" name="address" required rows="2"
+                          placeholder="Full delivery address"></textarea>
+                <small>This is encrypted and only shared with your assigned volunteer.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="general_area">General Area</label>
+                <input type="text" id="general_area" name="general_area" 
+                       placeholder="e.g., North Sacramento, Midtown">
+                <small>Helps volunteers find requests in their area (not your exact location).</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone Number (Optional)</label>
+                <input type="tel" id="phone" name="phone" 
+                       placeholder="For urgent coordination">
+                <small>Encrypted. Only used if in-app messaging isn't working.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="notes">Delivery Notes (Optional)</label>
+                <textarea id="notes" name="notes" rows="2"
+                          placeholder="Gate code, apartment number, special instructions"></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></p>
+            <p>Want to volunteer instead? <a href="{{ url_for('volunteer.apply') }}">Apply here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

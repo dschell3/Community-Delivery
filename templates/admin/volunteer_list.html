@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Volunteers - Community Delivery Network{% endblock %}
+
+{% block content %}
+<div class="dashboard admin-dashboard">
+    <div class="dashboard-header">
+        <h1>Manage Volunteers</h1>
+    </div>
+    
+    <div class="filter-bar" style="margin-bottom: 1.5rem;">
+        <a href="{{ url_for('admin.volunteer_list') }}" 
+           class="btn {{ 'btn-primary' if status_filter == 'all' else 'btn-secondary' }} btn-small">All</a>
+        <a href="{{ url_for('admin.volunteer_list', status='pending') }}" 
+           class="btn {{ 'btn-primary' if status_filter == 'pending' else 'btn-secondary' }} btn-small">Pending</a>
+        <a href="{{ url_for('admin.volunteer_list', status='approved') }}" 
+           class="btn {{ 'btn-primary' if status_filter == 'approved' else 'btn-secondary' }} btn-small">Approved</a>
+        <a href="{{ url_for('admin.volunteer_list', status='suspended') }}" 
+           class="btn {{ 'btn-primary' if status_filter == 'suspended' else 'btn-secondary' }} btn-small">Suspended</a>
+        <a href="{{ url_for('admin.volunteer_list', status='rejected') }}" 
+           class="btn {{ 'btn-primary' if status_filter == 'rejected' else 'btn-secondary' }} btn-small">Rejected</a>
+    </div>
+    
+    {% if volunteers %}
+    <div class="volunteer-list">
+        {% for volunteer in volunteers %}
+        <div class="delivery-card">
+            <div class="delivery-header">
+                <h3>{{ volunteer.full_name }}</h3>
+                <span class="status-badge status-{{ volunteer.status }}">{{ volunteer.status | title }}</span>
+            </div>
+            
+            <div class="delivery-details">
+                <p><strong>Email:</strong> {{ volunteer.user.email }}</p>
+                <p><strong>Service Area:</strong> {{ volunteer.service_area }}</p>
+                <p><strong>Applied:</strong> {{ volunteer.created_at.strftime('%B %d, %Y') }}</p>
+                {% if volunteer.is_approved %}
+                <p><strong>Deliveries:</strong> {{ volunteer.total_deliveries }} 
+                   {% if volunteer.average_rating %}| Rating: {{ "%.1f"|format(volunteer.average_rating) }}★{% endif %}</p>
+                {% endif %}
+            </div>
+            
+            <div class="delivery-actions">
+                {% if volunteer.status == 'pending' %}
+                <a href="{{ url_for('admin.volunteer_review', id=volunteer.id) }}" class="btn btn-primary">Review Application</a>
+                {% else %}
+                <a href="{{ url_for('admin.volunteer_detail', id=volunteer.id) }}" class="btn btn-secondary">View Details</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>No volunteers found with this status.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

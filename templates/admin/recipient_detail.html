@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Recipient Details - Community Delivery Network{% endblock %}
+
+{% block content %}
+<div class="dashboard admin-dashboard">
+    <div class="dashboard-header">
+        <h1>Recipient #{{ recipient.id }}</h1>
+        {% if recipient.is_deleted %}
+        <span class="status-badge status-canceled">Deleted</span>
+        {% endif %}
+    </div>
+    
+    <div class="delivery-card">
+        <h3>Profile Information</h3>
+        <div class="delivery-details">
+            <p><strong>Display Name:</strong> {{ recipient.display_name }}</p>
+            <p><strong>Email:</strong> {{ recipient.user.email }}</p>
+            <p><strong>General Area:</strong> {{ recipient.general_area or 'Not specified' }}</p>
+            <p><strong>Member Since:</strong> {{ recipient.created_at.strftime('%B %d, %Y') }}</p>
+            <p><strong>Last Active:</strong> {{ recipient.user.last_active.strftime('%B %d, %Y') if recipient.user.last_active else 'Never' }}</p>
+            {% if recipient.deleted_at %}
+            <p><strong>Deleted:</strong> {{ recipient.deleted_at.strftime('%B %d, %Y') }}</p>
+            {% endif %}
+        </div>
+        
+        {% if not recipient.is_deleted %}
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+            {% if show_address and address %}
+            <div class="alert alert-warning">
+                <strong>Sensitive Data:</strong> Address viewing has been logged.
+            </div>
+            <p><strong>Address:</strong> {{ address }}</p>
+            {% else %}
+            <form method="GET" style="display: inline;">
+                <input type="hidden" name="show_address" value="true">
+                <button type="submit" class="btn btn-secondary btn-small">
+                    Reveal Address (logged)
+                </button>
+            </form>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if deliveries %}
+    <section class="dashboard-section">
+        <h2>Delivery History</h2>
+        <div class="delivery-list">
+            {% for delivery in deliveries %}
+            <div class="delivery-card delivery-{{ delivery.status }}">
+                <div class="delivery-header">
+                    <h4>{{ delivery.store_name }}</h4>
+                    <span class="status-badge status-{{ delivery.status }}">{{ delivery.status | title }}</span>
+                </div>
+                <div class="delivery-details">
+                    <p><strong>Date:</strong> {{ (delivery.completed_at or delivery.created_at).strftime('%B %d, %Y') }}</p>
+                    {% if delivery.volunteer_id %}
+                    <p><strong>Volunteer:</strong> 
+                        <a href="{{ url_for('admin.volunteer_detail', id=delivery.volunteer_id) }}">
+                            #{{ delivery.volunteer_id }}
+                        </a>
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    
+    {% if audit_history %}
+    <section class="dashboard-section">
+        <h2>Audit History</h2>
+        <div class="activity-list">
+            {% for entry in audit_history[:20] %}
+            <div class="activity-item">
+                <span class="activity-action">{{ entry.action | replace('_', ' ') | title }}</span>
+                <span class="activity-time">{{ entry.timestamp.strftime('%b %d, %I:%M %p') }}</span>
+                {% if entry.volunteer_id %}
+                <a href="{{ url_for('admin.volunteer_detail', id=entry.volunteer_id) }}" class="activity-link">
+                    Volunteer #{{ entry.volunteer_id }}
+                </a>
+                {% endif %}
+                {% if entry.delivery_id %}
+                <span class="activity-detail">Delivery #{{ entry.delivery_id }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    
+    <div style="margin-top: 1.5rem;">
+        <a href="{{ url_for('admin.audit_log') }}" class="btn btn-secondary">← Back to Audit Log</a>
+    </div>
+</div>
+{% endblock %}

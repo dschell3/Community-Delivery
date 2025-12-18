@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Rate Your Delivery - Community Delivery Network{% endblock %}
+
+{% block extra_css %}
+<style>
+    .rating-stars {
+        display: flex;
+        gap: 0.5rem;
+        margin: 1rem 0;
+    }
+    
+    .rating-stars input {
+        display: none;
+    }
+    
+    .rating-stars label {
+        font-size: 2.5rem;
+        color: #d1d5db;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    
+    .rating-stars label:hover,
+    .rating-stars label:hover ~ label,
+    .rating-stars input:checked ~ label {
+        color: #fbbf24;
+    }
+    
+    .rating-stars {
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h1>Rate Your Delivery</h1>
+        <p class="text-muted">How was your experience with {{ delivery.volunteer.full_name }}?</p>
+        
+        <div class="delivery-summary" style="background: var(--background); padding: 1rem; border-radius: var(--radius); margin-bottom: 1.5rem;">
+            <p><strong>Store:</strong> {{ delivery.store_name }}</p>
+            <p><strong>Delivered:</strong> {{ delivery.completed_at.strftime('%B %d, %Y') }}</p>
+        </div>
+        
+        <form method="POST" class="form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="form-group">
+                <label>Rating <span class="required">*</span></label>
+                <div class="rating-stars">
+                    <input type="radio" name="score" value="5" id="star5" required>
+                    <label for="star5" title="5 stars">★</label>
+                    <input type="radio" name="score" value="4" id="star4">
+                    <label for="star4" title="4 stars">★</label>
+                    <input type="radio" name="score" value="3" id="star3">
+                    <label for="star3" title="3 stars">★</label>
+                    <input type="radio" name="score" value="2" id="star2">
+                    <label for="star2" title="2 stars">★</label>
+                    <input type="radio" name="score" value="1" id="star1">
+                    <label for="star1" title="1 star">★</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="comment">Comment (Optional)</label>
+                <textarea id="comment" name="comment" rows="3" 
+                          placeholder="Share any feedback about your experience..."></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">Submit Rating</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p><a href="{{ url_for('recipient.dashboard') }}">← Skip for now</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
