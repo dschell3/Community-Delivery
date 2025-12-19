@@ -7,7 +7,7 @@ class AuditLog(db.Model):
     """Audit log tracking relationships and actions (no sensitive data)."""
     __tablename__ = 'audit_log'
     
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     volunteer_id = db.Column(db.Integer, nullable=True, index=True)
     recipient_id = db.Column(db.Integer, nullable=True, index=True)
     delivery_id = db.Column(db.Integer, nullable=True, index=True)

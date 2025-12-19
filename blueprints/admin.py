@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
+from flask import Blueprint, current_app, render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
 
 from app import db
@@ -9,6 +9,8 @@ from models.audit import AuditLog
 from services.audit_service import AuditService
 from services.cleanup_service import delete_volunteer_id_uploads
 from services.encryption_service import get_encryption_service
+from flask import send_from_directory
+
 
 bp = Blueprint('admin', __name__)
 
@@ -317,3 +319,11 @@ def recipient_detail(id):
         deliveries=deliveries,
         audit_history=audit_history
     )
+
+@bp.route('/uploads/<path:filename>')
+@login_required
+@admin_required
+def serve_upload(filename):
+    """Serve uploaded files to admins only."""
+    upload_folder = current_app.config['UPLOAD_FOLDER']
+    return send_from_directory(upload_folder, filename)

@@ -30,8 +30,8 @@
         {% if volunteer.photo_path %}
         <div style="margin-top: 1rem;">
             <h4>Profile Photo</h4>
-            <img src="{{ url_for('static', filename=volunteer.photo_path.replace('uploads/', '')) }}" 
-                 alt="Profile photo" style="max-width: 200px; border-radius: var(--radius);">
+            
+                alt="Profile photo" style="max-width: 200px; border-radius: var(--radius);">
         </div>
         {% endif %}
     </div>
@@ -42,8 +42,8 @@
         <p class="text-muted">Review the ID to verify the applicant's identity. This image will be deleted after your decision.</p>
         
         <div style="margin: 1rem 0;">
-            <img src="{{ url_for('static', filename=id_upload.file_path.replace('uploads/', '')) }}" 
-                 alt="ID photo" style="max-width: 400px; border: 1px solid var(--border); border-radius: var(--radius);">
+            <img src="{{ url_for('admin.serve_upload', filename=id_upload.file_path.replace('uploads/', '').replace('\\', '/')) }}"
+                alt="ID photo" style="max-width: 400px; border: 1px solid var(--border); border-radius: var(--radius);">
         </div>
         
         <p class="text-muted"><strong>Expires:</strong> {{ id_upload.expires_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
