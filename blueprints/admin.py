@@ -209,12 +209,50 @@ def volunteer_suspend(id):
     
     reason = request.form.get('reason', '').strip() or None
     
+    # Release all active deliveries back to the pool with highest priority
+    active_deliveries = Delivery.query.filter(
+        Delivery.volunteer_id == volunteer.id,
+        Delivery.status.in_(['claimed', 'picked_up'])
+    ).all()
+    
+    released_count = 0
+    for delivery in active_deliveries:
+        # Get current max priority to set this higher
+        max_priority = db.session.query(db.func.max(Delivery.priority)).filter(
+            Delivery.status == 'open'
+        ).scalar() or 0
+        
+        # Release delivery back to pool with highest priority
+        delivery.volunteer_id = None
+        delivery.status = 'open'
+        delivery.claimed_at = None
+        delivery.picked_up_at = None
+        delivery.priority = max_priority + 10  # Ensure highest priority
+        
+        # Audit log for each released delivery
+        AuditService.log_delivery_canceled(
+            delivery.id,
+            volunteer_id=volunteer.id,
+            recipient_id=delivery.recipient_id,
+            canceled_by='admin',
+            reason=f'Volunteer suspended: {reason or "No reason provided"}'
+        )
+        
+        released_count += 1
+    
+    # Suspend the volunteer
     volunteer.suspend(current_user, reason)
     
     # Audit log
     AuditService.log_volunteer_suspended(volunteer.id, current_user.id, reason)
     
-    flash(f'{volunteer.full_name} has been suspended.', 'warning')
+    db.session.commit()
+    
+    if released_count > 0:
+        flash(f'{volunteer.full_name} has been suspended. {released_count} active delivery(ies) returned to the pool with high priority.', 'warning')
+    else:
+        flash(f'{volunteer.full_name} has been suspended.', 'warning')
+    
     return redirect(url_for('admin.volunteer_detail', id=id))
 
 

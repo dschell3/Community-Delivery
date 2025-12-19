@@ -140,12 +140,13 @@ class DeliveryService:
     
     @staticmethod
     def release_claim(delivery, volunteer, reason=None):
-        """Volunteer releases their claim on a delivery."""
+        """Volunteer releases their claim on a delivery (only before pickup)."""
         if delivery.volunteer_id != volunteer.id:
             raise ValueError("This delivery is not assigned to you")
         
-        if delivery.status not in ['claimed', 'picked_up']:
-            raise ValueError("No claim to release")
+        # Only allow release before pickup - after pickup, contact admin
+        if delivery.status != 'claimed':
+            raise ValueError("Cannot release delivery after pickup. Please contact an administrator for assistance.")
         
         recipient_id = delivery.recipient_id
         
