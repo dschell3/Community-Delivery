@@ -30,7 +30,7 @@
         {% if volunteer.photo_path %}
         <div style="margin-top: 1rem;">
             <h4>Profile Photo</h4>
-            
+            <img src="{{ url_for('admin.serve_upload', filename=volunteer.photo_path.replace('\\', '/').replace('uploads/', '')) }}"
                 alt="Profile photo" style="max-width: 200px; border-radius: var(--radius);">
         </div>
         {% endif %}
@@ -42,7 +42,7 @@
         <p class="text-muted">Review the ID to verify the applicant's identity. This image will be deleted after your decision.</p>
         
         <div style="margin: 1rem 0;">
-            <img src="{{ url_for('admin.serve_upload', filename=id_upload.file_path.replace('uploads/', '').replace('\\', '/')) }}"
+            <img src="{{ url_for('admin.serve_upload', filename=id_upload.file_path.replace('\\', '/').replace('uploads/', '')) }}"
                 alt="ID photo" style="max-width: 400px; border: 1px solid var(--border); border-radius: var(--radius);">
         </div>
         

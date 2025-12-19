@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, current_app
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, login_user
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash
 
@@ -149,8 +149,10 @@ def apply():
         # Audit log
         AuditService.log_volunteer_registered(volunteer.id)
         
-        flash('Application submitted! You will be notified once reviewed.', 'success')
-        return redirect(url_for('auth.login'))
+        # Auto-login and redirect to pending page
+        login_user(user)
+        flash('Application submitted successfully! Your application is under review.', 'success')
+        return redirect(url_for('volunteer.pending'))
     
     return render_template('volunteer/apply.html')
 

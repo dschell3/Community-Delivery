@@ -58,10 +58,34 @@ class MessagePoller {
         }
     }
     
+    removeEmptyState() {
+        // Remove the "No messages yet" placeholder if it exists
+        if (!this.messageContainer) return;
+        
+        const emptyState = this.messageContainer.querySelector('.chat-empty');
+        if (emptyState) {
+            emptyState.remove();
+        }
+        
+        // Also check for any div with centered text-muted styling (alternate empty state)
+        const altEmptyState = this.messageContainer.querySelector('div[style*="text-align: center"]');
+        if (altEmptyState && altEmptyState.textContent.includes('No messages yet')) {
+            altEmptyState.remove();
+        }
+    }
+    
     appendMessages(messages) {
         if (!this.messageContainer) return;
         
+        // Remove empty state placeholder before adding messages
+        this.removeEmptyState();
+        
         messages.forEach(msg => {
+            // Check if message already exists (prevent duplicates)
+            if (this.messageContainer.querySelector(`[data-message-id="${msg.id}"]`)) {
+                return;
+            }
+            
             const messageEl = this.createMessageElement(msg);
             this.messageContainer.appendChild(messageEl);
         });
