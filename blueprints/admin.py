@@ -167,6 +167,13 @@ def volunteer_approve(id):
     # Audit log
     AuditService.log_volunteer_approved(volunteer.id, current_user.id)
     
+    # Send notification to volunteer
+    try:
+        from services.notification_service import NotificationService
+        NotificationService.notify_volunteer_approved(volunteer)
+    except Exception as e:
+        current_app.logger.error(f"Failed to send approval notification: {e}")
+    
     flash(f'{volunteer.full_name} has been approved.', 'success')
     return redirect(url_for('admin.volunteer_list', status='pending'))
 
@@ -191,6 +198,13 @@ def volunteer_reject(id):
     
     # Audit log
     AuditService.log_volunteer_rejected(volunteer.id, current_user.id, reason)
+    
+    # Send notification to volunteer
+    try:
+        from services.notification_service import NotificationService
+        NotificationService.notify_volunteer_rejected(volunteer, reason)
+    except Exception as e:
+        current_app.logger.error(f"Failed to send rejection notification: {e}")
     
     flash(f'{volunteer.full_name} has been rejected.', 'info')
     return redirect(url_for('admin.volunteer_list', status='pending'))
@@ -247,6 +261,13 @@ def volunteer_suspend(id):
     AuditService.log_volunteer_suspended(volunteer.id, current_user.id, reason)
     
     db.session.commit()
+    
+    # Send notification to volunteer
+    try:
+        from services.notification_service import NotificationService
+        NotificationService.notify_volunteer_suspended(volunteer, reason)
+    except Exception as e:
+        current_app.logger.error(f"Failed to send suspension notification: {e}")
     
     if released_count > 0:
         flash(f'{volunteer.full_name} has been suspended. {released_count} active delivery(ies) returned to the pool with high priority.', 'warning')

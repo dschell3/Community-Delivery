@@ -55,6 +55,13 @@ class DeliveryService:
             delivery.recipient_id
         )
         
+        # Send notification to recipient
+        try:
+            from services.notification_service import NotificationService
+            NotificationService.notify_delivery_claimed(delivery)
+        except Exception as e:
+            current_app.logger.error(f"Failed to send claim notification: {e}")
+        
         return delivery
     
     @staticmethod
@@ -76,6 +83,13 @@ class DeliveryService:
             volunteer.id,
             delivery.recipient_id
         )
+        
+        # Send notification to recipient
+        try:
+            from services.notification_service import NotificationService
+            NotificationService.notify_delivery_picked_up(delivery)
+        except Exception as e:
+            current_app.logger.error(f"Failed to send pickup notification: {e}")
         
         return delivery
     
@@ -103,6 +117,13 @@ class DeliveryService:
             delivery.recipient_id
         )
         
+        # Send notification to recipient
+        try:
+            from services.notification_service import NotificationService
+            NotificationService.notify_delivery_completed(delivery)
+        except Exception as e:
+            current_app.logger.error(f"Failed to send completion notification: {e}")
+        
         return delivery
     
     @staticmethod
@@ -116,6 +137,7 @@ class DeliveryService:
         
         was_claimed = delivery.status in ['claimed', 'picked_up']
         volunteer_id = delivery.volunteer_id
+        volunteer = delivery.volunteer  # Get volunteer before clearing
         
         delivery.status = 'canceled'
         delivery.canceled_at = datetime.utcnow()
@@ -135,6 +157,14 @@ class DeliveryService:
             canceled_by='recipient',
             reason=reason
         )
+        
+        # Notify volunteer if delivery was claimed
+        if was_claimed and volunteer:
+            try:
+                from services.notification_service import NotificationService
+                NotificationService.notify_volunteer_delivery_canceled(volunteer, delivery, reason='recipient')
+            except Exception as e:
+                current_app.logger.error(f"Failed to send cancellation notification: {e}")
         
         return delivery
     
@@ -220,6 +250,7 @@ class DeliveryService:
         
         for delivery in active_deliveries:
             volunteer_id = delivery.volunteer_id
+            volunteer = delivery.volunteer  # Get volunteer before clearing
             
             delivery.status = 'canceled'
             delivery.canceled_at = datetime.utcnow()
@@ -237,6 +268,14 @@ class DeliveryService:
                 canceled_by='system',
                 reason='Recipient account deleted'
             )
+            
+            # Notify volunteer if delivery was claimed
+            if volunteer:
+                try:
+                    from services.notification_service import NotificationService
+                    NotificationService.notify_volunteer_delivery_canceled(volunteer, delivery, reason='account_deleted')
+                except Exception as e:
+                    current_app.logger.error(f"Failed to send deletion notification: {e}")
         
         db.session.commit()
         return len(active_deliveries)

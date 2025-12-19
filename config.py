@@ -29,6 +29,12 @@ class Config:
     MAX_ACTIVE_CLAIMS_PER_VOLUNTEER = 2
     MESSAGE_POLL_INTERVAL_SECONDS = 10
     INACTIVE_ACCOUNT_PURGE_MONTHS = 18
+    
+    # Email notifications (Resend)
+    # If RESEND_API_KEY is not set, notifications will be logged but not sent
+    RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
+    NOTIFICATION_FROM_EMAIL = os.environ.get('NOTIFICATION_FROM_EMAIL', 'Community Delivery <noreply@yourdomain.com>')
+    APP_URL = os.environ.get('APP_URL', 'http://localhost:5000')
 
 
 class DevelopmentConfig(Config):
