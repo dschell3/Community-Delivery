@@ -1,65 +1,371 @@
 {% extends "base.html" %}
 
-{% block title %}Community Delivery Network - Connecting Neighbors{% endblock %}
+{% block title %}Aquí Estamos - Connecting Neighbors for Grocery Delivery{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero Section - Modern SaaS Style */
+    .hero {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        align-items: center;
+        padding: 4rem 1rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .hero-content {
+        text-align: left;
+    }
+    
+    .hero-content h1 {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+        line-height: 1.1;
+    }
+    
+    .hero-tagline {
+        font-size: 1.5rem;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+        font-style: italic;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.25rem;
+        color: var(--text-muted);
+        margin-bottom: 2rem;
+    }
+    
+    .hero-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .hero-image {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .hero-image img {
+        max-width: 100%;
+        height: auto;
+        max-height: 400px;
+    }
+    
+    /* Feature Sections - Cascading Layout */
+    .feature-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        align-items: center;
+        padding: 4rem 1rem;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+    
+    .feature-section.reverse {
+        direction: rtl;
+    }
+    
+    .feature-section.reverse > * {
+        direction: ltr;
+    }
+    
+    .feature-content {
+        padding: 1rem;
+    }
+    
+    .feature-content .feature-label {
+        display: inline-block;
+        background: var(--primary-color);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 1rem;
+    }
+    
+    .feature-content h2 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .feature-content p {
+        font-size: 1.125rem;
+        color: var(--text-muted);
+        line-height: 1.7;
+    }
+    
+    .feature-image {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .feature-image img {
+        max-width: 100%;
+        height: auto;
+        max-height: 320px;
+    }
+    
+    /* Divider */
+    .section-divider {
+        max-width: 1100px;
+        margin: 0 auto;
+        border: none;
+        border-top: 1px solid var(--border);
+    }
+    
+    /* How It Works Summary */
+    .how-it-works-summary {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 3rem 2rem;
+        max-width: 900px;
+        margin: 2rem auto;
+        text-align: center;
+    }
+    
+    .how-it-works-summary h2 {
+        margin-bottom: 1rem;
+    }
+    
+    .how-it-works-summary p {
+        font-size: 1.125rem;
+        color: var(--text-muted);
+        max-width: 700px;
+        margin: 0 auto;
+    }
+    
+    /* CTA Section */
+    .cta-section {
+        padding: 4rem 1rem;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .cta-section h2 {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .cta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+    }
+    
+    .cta-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        text-align: center;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .cta-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .cta-card h3 {
+        margin-bottom: 0.75rem;
+    }
+    
+    .cta-card p {
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Trust Badges */
+    .trust-section {
+        text-align: center;
+        padding: 2rem 1rem 3rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .trust-badges {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+    
+    .trust-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-muted);
+        font-size: 0.9375rem;
+    }
+    
+    .trust-badge-icon {
+        font-size: 1.25rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .hero {
+            grid-template-columns: 1fr;
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+        
+        .hero-content {
+            text-align: center;
+            order: 1;
+        }
+        
+        .hero-image {
+            order: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .hero-content h1 {
+            font-size: 2.25rem;
+        }
+        
+        .hero-actions {
+            justify-content: center;
+        }
+        
+        .feature-section {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            padding: 2rem 1rem;
+        }
+        
+        .feature-section.reverse {
+            direction: ltr;
+        }
+        
+        .feature-image {
+            order: -1;
+        }
+        
+        .feature-content h2 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="landing">
+    <!-- Hero Section -->
     <section class="hero">
-        <h1>Community Delivery Network</h1>
-        <p class="hero-subtitle">Connecting neighbors to help each other with grocery delivery</p>
+        <div class="hero-content">
+            <h1>Aquí Estamos</h1>
+            <p class="hero-tagline">"We are here for you"</p>
+            <p class="hero-subtitle">
+                Connecting neighbors to help each other with grocery delivery. 
+                Safe, private, and free.
+            </p>
+            
+            <div class="hero-actions">
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-large">Get Started</a>
+                <a href="#how-it-works" class="btn btn-secondary btn-large">Learn More</a>
+            </div>
+        </div>
         
-        <div class="hero-actions">
-            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-large">Get Started</a>
-            <a href="#how-it-works" class="btn btn-secondary btn-large">Learn More</a>
+        <div class="hero-image">
+            <img src="{{ url_for('static', filename='images/showing-support.svg') }}" 
+                 alt="Community members helping each other">
         </div>
     </section>
     
-    <section id="how-it-works" class="section">
-        <h2>How It Works</h2>
+    <!-- Trust Badges -->
+    <div class="trust-section">
+        <div class="trust-badges">
+            <div class="trust-badge">
+                <span class="trust-badge-icon">🔒</span>
+                <span>Your address stays private</span>
+            </div>
+            <div class="trust-badge">
+                <span class="trust-badge-icon">✓</span>
+                <span>Vetted volunteers</span>
+            </div>
+            <div class="trust-badge">
+                <span class="trust-badge-icon">💰</span>
+                <span>100% free service</span>
+            </div>
+        </div>
+    </div>
+    
+    <hr class="section-divider" id="how-it-works">
+    
+    <!-- Feature 1: For Recipients -->
+    <section class="feature-section">
+        <div class="feature-content">
+            <span class="feature-label">Para Ti · For You</span>
+            <h2>Need groceries delivered?</h2>
+            <p>
+                Place your order at your preferred store using their pickup option. 
+                Then post a request here with the pickup details. A trusted volunteer 
+                will pick up your groceries and bring them to your door—no questions asked.
+            </p>
+        </div>
         
-        <div class="feature-grid">
-            <div class="feature">
-                <div class="feature-icon">🛒</div>
-                <h3>For Those Who Need Help</h3>
-                <p>Place your grocery order at your preferred store with the pickup option. 
-                   Then post a request here with the pickup details. A volunteer will pick it up 
-                   and deliver it to your door.</p>
-            </div>
-            
-            <div class="feature">
-                <div class="feature-icon">🤝</div>
-                <h3>For Volunteers</h3>
-                <p>Sign up to help your neighbors. Browse available delivery requests in your area, 
-                   claim one that fits your schedule, pick up the groceries, and deliver them.</p>
-            </div>
-            
-            <div class="feature">
-                <div class="feature-icon">🔒</div>
-                <h3>Safe & Private</h3>
-                <p>Your personal information is protected. Volunteers are vetted before approval. 
-                   Addresses are only shared when necessary and communication happens through the app.</p>
-            </div>
+        <div class="feature-image">
+            <img src="{{ url_for('static', filename='images/shopping-app.svg') }}" 
+                 alt="Placing a grocery order on your phone">
         </div>
     </section>
     
-    <section class="section section-alt">
-        <h2>No Fees, No Hassle</h2>
-        <p>This platform is free for everyone. You pay for your groceries at the store (pickup option). 
-           We just help coordinate the delivery from volunteers in your community.</p>
+    <!-- Feature 2: For Volunteers -->
+    <section class="feature-section reverse">
+        <div class="feature-content">
+            <span class="feature-label">Voluntarios · Volunteers</span>
+            <h2>Want to help your neighbors?</h2>
+            <p>
+                Sign up to become a volunteer. Browse delivery requests in your area, 
+                claim one that fits your schedule, pick up the groceries, and deliver them. 
+                It's a simple way to make a real difference in someone's day.
+            </p>
+        </div>
+        
+        <div class="feature-image">
+            <img src="{{ url_for('static', filename='images/package-arrived.svg') }}" 
+                 alt="Volunteer delivering groceries">
+        </div>
     </section>
     
-    <section class="section">
-        <h2>Ready to Join?</h2>
+    <hr class="section-divider">
+    
+    <!-- No Fees Section -->
+    <div class="how-it-works-summary">
+        <h2>Sin Costo · No Fees</h2>
+        <p>
+            This platform is completely free for everyone. You pay for your groceries 
+            at the store (using their pickup option). We simply connect you with volunteers 
+            in your community who want to help.
+        </p>
+    </div>
+    
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <h2>¿Listo? · Ready to Join?</h2>
         <div class="cta-grid">
             <div class="cta-card">
-                <h3>Need Groceries Delivered?</h3>
-                <p>Register as a recipient to start posting delivery requests.</p>
+                <h3>Necesito Ayuda</h3>
+                <p>Register to request grocery deliveries from volunteers in your area.</p>
                 <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Sign Up</a>
             </div>
             
             <div class="cta-card">
-                <h3>Want to Help?</h3>
-                <p>Apply to become a volunteer and help your neighbors.</p>
+                <h3>Quiero Ayudar</h3>
+                <p>Apply to become a volunteer and help deliver groceries to neighbors.</p>
                 <a href="{{ url_for('volunteer.apply') }}" class="btn btn-secondary">Volunteer</a>
             </div>
         </div>

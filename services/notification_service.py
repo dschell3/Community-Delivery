@@ -28,7 +28,7 @@ You can message your volunteer through the app to coordinate.
 
 Log in to view details: {{ app_url }}/recipient/request/{{ delivery_id }}
 
-Thank you for using Community Delivery Network!
+Thank you for using Aquí Estamos!
 '''
         },
         'delivery_picked_up': {
@@ -42,7 +42,7 @@ You can message your volunteer if you need to provide any last-minute instructio
 
 Log in to track: {{ app_url }}/recipient/request/{{ delivery_id }}
 
-Thank you for using Community Delivery Network!
+Thank you for using Aquí Estamos!
 '''
         },
         'delivery_completed': {
@@ -58,7 +58,7 @@ We'd love to hear about your experience! Please take a moment to rate your volun
 
 Your feedback helps us maintain a trusted community of volunteers.
 
-Thank you for using Community Delivery Network!
+Thank you for using Aquí Estamos!
 '''
         },
         'delivery_canceled_notify_volunteer': {
@@ -104,7 +104,7 @@ Thank you for your understanding.
             'body': '''
 Hello {{ volunteer_name }},
 
-Congratulations! Your application to volunteer with Community Delivery Network has been approved.
+Congratulations! Your application to volunteer with Aquí Estamos has been approved.
 
 You can now:
 - Browse available delivery requests in your area
@@ -121,7 +121,7 @@ Thank you for joining our community of helpers!
             'body': '''
 Hello {{ volunteer_name }},
 
-Thank you for your interest in volunteering with Community Delivery Network.
+Thank you for your interest in volunteering with Aquí Estamos.
 
 After reviewing your application, we are unable to approve it at this time.
 
@@ -139,7 +139,7 @@ Thank you for your understanding.
             'body': '''
 Hello {{ volunteer_name }},
 
-Your volunteer account with Community Delivery Network has been suspended.
+Your volunteer account with Aquí Estamos has been suspended.
 
 {% if reason %}
 Reason: {{ reason }}

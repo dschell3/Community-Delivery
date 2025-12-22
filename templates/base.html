@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Community Delivery Network{% endblock %}</title>
+    <title>{% block title %}Aquí Estamos{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="{{ url_for('index') }}" class="nav-brand">Community Delivery</a>
+            <a href="{{ url_for('index') }}" class="nav-brand">Aquí Estamos</a>
             
             <div class="nav-links">
                 {% if current_user.is_authenticated %}
@@ -54,8 +54,8 @@
     
     <footer class="footer">
         <div class="container">
-            <p>&copy; {{ now().year if now is defined else '2025' }} Community Delivery Network. 
-               Built with care for our community.</p>
+            <p>&copy; {{ now().year if now is defined else '2025' }} Aquí Estamos. 
+               Built with care for our community. · Hecho con cariño para nuestra comunidad.</p>
         </div>
     </footer>
     

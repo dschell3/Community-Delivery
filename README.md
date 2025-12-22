@@ -1,4 +1,4 @@
-# Community Delivery Network
+# Aquí Estamos
 
 A coordination platform connecting immigrants with local volunteers for grocery pickup and delivery. Designed to minimize exposure risk for vulnerable community members while maintaining accountability and trust.
 

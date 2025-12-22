@@ -1,4 +1,4 @@
--- Community Delivery Network Database Schema
+-- Aquí Estamos Database Schema
 -- Current design uses sqlite for simplicity; adapt as needed for other RDBMS.
 -- Focus on security, data integrity, and auditability.
 
@@ -223,7 +223,7 @@ INSERT INTO config (key_name, value) VALUES
     ('id_upload_expiry_hours', '72'),
     ('inactive_account_purge_months', '18'),
     ('message_poll_interval_seconds', '10'),
-    ('org_name', 'Community Delivery Network'),
+    ('org_name', 'Aquí Estamos'),
     ('org_contact_email', 'admin@example.com');
 
 -- ============================================
