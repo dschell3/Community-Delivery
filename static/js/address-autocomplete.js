@@ -235,17 +235,19 @@ class StoreAutocomplete extends AddressAutocomplete {
         super(inputElement, storeOptions);
         
         // Grocery-like store types (no confirmation needed)
+        // Note: 'store' is intentionally excluded - too generic (matches auto parts, hardware, etc.)
         this.acceptedTypes = new Set([
             'grocery_or_supermarket',
             'supermarket',
             'food',
-            'store',
             'convenience_store',
             'drugstore',
-            'department_store',
+            'pharmacy',
             'shopping_mall',
             'meal_delivery',
-            'meal_takeaway'
+            'meal_takeaway',
+            'bakery',
+            'liquor_store'
         ]);
         
         // Find confirmation elements
@@ -310,13 +312,13 @@ class StoreAutocomplete extends AddressAutocomplete {
                 this.storeTypeDisplay.textContent = this.placeData.name || 'This location';
             }
             
-            this.confirmationModal.style.display = 'block';
+            this.confirmationModal.classList.add('active');
         }
     }
     
     hideConfirmation() {
         if (this.confirmationModal) {
-            this.confirmationModal.style.display = 'none';
+            this.confirmationModal.classList.remove('active');
         }
     }
     
