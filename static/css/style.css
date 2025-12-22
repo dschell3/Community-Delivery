@@ -167,6 +167,7 @@ main.container {
 .btn-primary {
     background: var(--primary-color);
     color: white;
+    border: 1px solid var(--primary-color);
 }
 
 .btn-primary:hover {
@@ -272,7 +273,7 @@ main.container {
 }
 
 .inline-form {
-    display: inline;
+    display: contents;
 }
 
 /* Flash Messages */

@@ -159,6 +159,7 @@ def register_recipient():
         # Audit log
         AuditService.log_recipient_registered(recipient.id)
         
+        login_user(user)
         flash('Account created successfully. Please log in.', 'success')
         return redirect(url_for('auth.login'))
     

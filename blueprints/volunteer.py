@@ -231,6 +231,10 @@ def dashboard():
     # Get available deliveries within volunteer's service area
     available_deliveries = DeliveryService.get_available_deliveries(volunteer)
     
+    # Get total open deliveries (for hint about other areas)
+    total_open_deliveries = Delivery.query.filter(Delivery.status == 'open').count()
+    other_area_deliveries = total_open_deliveries - len(available_deliveries)
+    
     # Get volunteer's active deliveries
     active_deliveries = Delivery.query.filter(
         Delivery.volunteer_id == volunteer.id,
@@ -253,7 +257,8 @@ def dashboard():
         active_deliveries=active_deliveries,
         completed_deliveries=completed_deliveries,
         can_claim=can_claim,
-        max_claims=max_claims
+        max_claims=max_claims,
+        other_area_deliveries=other_area_deliveries
     )
 
 

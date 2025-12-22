@@ -93,7 +93,15 @@
         </div>
         {% else %}
         <div class="empty-state">
-            <p>No deliveries available in your service area right now. Check back later!</p>
+            <p>No deliveries available in your service area right now.</p>
+            {% if other_area_deliveries > 0 %}
+            <p>There {{ 'is' if other_area_deliveries == 1 else 'are' }} 
+               <strong>{{ other_area_deliveries }}</strong> 
+               {{ 'delivery' if other_area_deliveries == 1 else 'deliveries' }} in other areas —
+               <a href="{{ url_for('volunteer.settings') }}">expand your service radius</a> to see more.</p>
+            {% else %}
+            <p>Check back later!</p>
+            {% endif %}
         </div>
         {% endif %}
     </section>
