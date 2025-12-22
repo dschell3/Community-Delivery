@@ -1,13 +1,36 @@
 {% extends "base.html" %}
+{% set use_google_places = true %}
 
 {% block title %}Settings - Community Delivery Network{% endblock %}
+
+{% block extra_css %}
+<style>
+    .address-error {
+        color: var(--error-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+    
+    .input-error {
+        border-color: var(--error-color) !important;
+    }
+    
+    .pac-container {
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+        margin-top: 4px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="auth-container">
     <div class="auth-card">
         <h1>Settings</h1>
         
-        <form method="POST" class="form">
+        <form method="POST" class="form" id="settings-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             
             <h3>Profile</h3>
@@ -24,17 +47,18 @@
             
             <div class="form-group">
                 <label for="address">Delivery Address <span class="required">*</span></label>
-                <textarea id="address" name="address" required rows="2"
-                          placeholder="Full delivery address">{{ current_address or '' }}</textarea>
+                <input type="text" id="address" name="address" required 
+                       value="{{ current_address or '' }}"
+                       placeholder="Start typing your address..."
+                       data-autocomplete="address"
+                       autocomplete="off">
+                <input type="hidden" id="address_place_id" name="address_place_id">
+                <input type="hidden" id="address_lat" name="address_lat" 
+                       value="{{ recipient.latitude or '' }}">
+                <input type="hidden" id="address_lng" name="address_lng"
+                       value="{{ recipient.longitude or '' }}">
+                <div id="address_error" class="address-error"></div>
                 <small>This is encrypted and only shared with your assigned volunteer.</small>
-            </div>
-            
-            <div class="form-group">
-                <label for="general_area">General Area</label>
-                <input type="text" id="general_area" name="general_area" 
-                       value="{{ recipient.general_area or '' }}"
-                       placeholder="e.g., North Sacramento, Midtown">
-                <small>Helps volunteers find requests in their area.</small>
             </div>
             
             <div class="form-group">
@@ -61,4 +85,48 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('settings-form');
+    const addressInput = document.getElementById('address');
+    const addressPlaceId = document.getElementById('address_place_id');
+    const addressLat = document.getElementById('address_lat');
+    const addressLng = document.getElementById('address_lng');
+    
+    // Track if user has modified the address
+    let addressModified = false;
+    
+    addressInput.addEventListener('input', function() {
+        addressModified = true;
+    });
+    
+    form.addEventListener('submit', function(e) {
+        // If address was modified, ensure it was selected from autocomplete
+        if (addressModified && addressInput.value.trim() && !addressPlaceId.value) {
+            e.preventDefault();
+            const errorEl = document.getElementById('address_error');
+            errorEl.textContent = 'Please select your address from the dropdown.';
+            errorEl.style.display = 'block';
+            addressInput.classList.add('input-error');
+            addressInput.focus();
+            return false;
+        }
+        
+        // If address wasn't modified but we have existing lat/lng, that's fine
+        if (!addressModified && addressLat.value && addressLng.value) {
+            return true;
+        }
+    });
+    
+    // Clear error when address is selected
+    addressInput.addEventListener('placeSelected', function() {
+        document.getElementById('address_error').style.display = 'none';
+        addressInput.classList.remove('input-error');
+        addressModified = false;
+    });
+});
+</script>
 {% endblock %}

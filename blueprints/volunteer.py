@@ -10,6 +10,7 @@ from models.user import User
 from models.volunteer import Volunteer, VolunteerIdUpload
 from models.delivery import Delivery
 from services.delivery_service import DeliveryService
+from services.geocoding_service import GeocodingService
 from services.audit_service import AuditService
 
 bp = Blueprint('volunteer', __name__)
@@ -56,8 +57,14 @@ def apply():
         
         # Profile info
         full_name = request.form.get('full_name', '').strip()
-        service_area = request.form.get('service_area', '').strip()
         availability_notes = request.form.get('availability_notes', '').strip() or None
+        
+        # Service area
+        service_center = request.form.get('service_center', '').strip()
+        service_center_place_id = request.form.get('service_center_place_id', '').strip()
+        service_center_lat = request.form.get('service_center_lat', '').strip()
+        service_center_lng = request.form.get('service_center_lng', '').strip()
+        service_radius = request.form.get('service_radius', '10')
         
         # Attestation
         attestation = request.form.get('attestation') == 'on'
@@ -76,8 +83,8 @@ def apply():
             errors.append('Passwords do not match.')
         if not full_name:
             errors.append('Full name is required.')
-        if not service_area:
-            errors.append('Service area is required.')
+        if not service_center:
+            errors.append('Service center address is required.')
         if not attestation:
             errors.append('You must confirm the attestation.')
         if User.query.filter_by(email=email).first():
@@ -93,6 +100,34 @@ def apply():
             errors.append('ID photo is required for verification.')
         elif not allowed_file(id_photo.filename):
             errors.append('ID photo must be PNG, JPG, or JPEG.')
+        
+        # Validate service center address
+        center_lat = None
+        center_lng = None
+        
+        if service_center_place_id or service_center:
+            validation = GeocodingService.validate_address_in_service_area(
+                place_id=service_center_place_id,
+                address=service_center
+            )
+            
+            if not validation.get('valid'):
+                errors.append(validation.get('error', 'Invalid service center address.'))
+            else:
+                center_lat = validation.get('latitude')
+                center_lng = validation.get('longitude')
+                service_center = validation.get('address', service_center)
+        else:
+            errors.append('Please select your service center address from the dropdown.')
+        
+        # Validate service radius
+        try:
+            service_radius = int(service_radius)
+            valid_radii = current_app.config.get('VOLUNTEER_RADIUS_OPTIONS', [5, 10, 15, 25, 50])
+            if service_radius not in valid_radii:
+                errors.append('Invalid service radius selected.')
+        except ValueError:
+            errors.append('Invalid service radius.')
         
         if errors:
             for error in errors:
@@ -122,12 +157,15 @@ def apply():
             user_id=user.id,
             full_name=full_name,
             photo_path=photo_path,
-            service_area=service_area,
             availability_notes=availability_notes,
             status='pending',
             attestation_completed=True,
             attestation_timestamp=datetime.utcnow()
         )
+        
+        # Set service area
+        volunteer.set_service_center(service_center, center_lat, center_lng, service_radius)
+        
         db.session.add(volunteer)
         db.session.flush()
         
@@ -185,10 +223,13 @@ def dashboard():
     """Volunteer dashboard - view available and active deliveries."""
     volunteer = current_user.volunteer_profile
     
-    # Get available deliveries in service area
-    available_deliveries = DeliveryService.get_available_deliveries(
-        service_area=volunteer.service_area
-    )
+    # Check if volunteer has set up service area
+    if not volunteer.has_service_location:
+        flash('Please set up your service area in settings before viewing deliveries.', 'warning')
+        return redirect(url_for('volunteer.settings'))
+    
+    # Get available deliveries within volunteer's service area
+    available_deliveries = DeliveryService.get_available_deliveries(volunteer)
     
     # Get volunteer's active deliveries
     active_deliveries = Delivery.query.filter(
@@ -333,13 +374,66 @@ def settings():
     volunteer = current_user.volunteer_profile
     
     if request.method == 'POST':
-        service_area = request.form.get('service_area', '').strip()
         availability_notes = request.form.get('availability_notes', '').strip() or None
         
-        if not service_area:
-            flash('Service area is required.', 'error')
+        # Service area
+        service_center = request.form.get('service_center', '').strip()
+        service_center_place_id = request.form.get('service_center_place_id', '').strip()
+        service_center_lat = request.form.get('service_center_lat', '').strip()
+        service_center_lng = request.form.get('service_center_lng', '').strip()
+        service_radius = request.form.get('service_radius', '10')
+        
+        errors = []
+        
+        # Validate service center if provided/changed
+        if service_center:
+            # Check if we have new geocoding data or need to validate
+            if service_center_place_id:
+                # New address selected from autocomplete
+                validation = GeocodingService.validate_address_in_service_area(
+                    place_id=service_center_place_id,
+                    address=service_center
+                )
+                
+                if not validation.get('valid'):
+                    errors.append(validation.get('error', 'Invalid service center address.'))
+                else:
+                    center_lat = validation.get('latitude')
+                    center_lng = validation.get('longitude')
+                    service_center = validation.get('address', service_center)
+                    
+                    # Validate radius
+                    try:
+                        service_radius = int(service_radius)
+                        valid_radii = current_app.config.get('VOLUNTEER_RADIUS_OPTIONS', [5, 10, 15, 25, 50])
+                        if service_radius not in valid_radii:
+                            errors.append('Invalid service radius selected.')
+                    except ValueError:
+                        errors.append('Invalid service radius.')
+                    
+                    if not errors:
+                        volunteer.set_service_center(service_center, center_lat, center_lng, service_radius)
+            
+            elif service_center_lat and service_center_lng:
+                # Address not changed, just update radius
+                try:
+                    service_radius = int(service_radius)
+                    valid_radii = current_app.config.get('VOLUNTEER_RADIUS_OPTIONS', [5, 10, 15, 25, 50])
+                    if service_radius not in valid_radii:
+                        errors.append('Invalid service radius selected.')
+                    else:
+                        volunteer.service_radius_miles = service_radius
+                except ValueError:
+                    errors.append('Invalid service radius.')
+            else:
+                errors.append('Please select your service center address from the dropdown.')
         else:
-            volunteer.service_area = service_area
+            errors.append('Service center address is required.')
+        
+        if errors:
+            for error in errors:
+                flash(error, 'error')
+        else:
             volunteer.availability_notes = availability_notes
             
             # Handle photo update

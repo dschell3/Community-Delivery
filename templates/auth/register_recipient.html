@@ -1,6 +1,43 @@
 {% extends "base.html" %}
+{% set use_google_places = true %}
 
 {% block title %}Register as Recipient - Community Delivery Network{% endblock %}
+
+{% block extra_css %}
+<style>
+    .address-error {
+        color: var(--error-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+    
+    .input-error {
+        border-color: var(--error-color) !important;
+    }
+    
+    /* Style the Google autocomplete dropdown */
+    .pac-container {
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+        margin-top: 4px;
+    }
+    
+    .pac-item {
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+    }
+    
+    .pac-item:hover {
+        background: var(--background);
+    }
+    
+    .pac-item-selected {
+        background: var(--background);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="auth-container">
@@ -8,7 +45,7 @@
         <h1>Register for Deliveries</h1>
         <p class="text-muted">Your information is encrypted and only shared with volunteers when necessary.</p>
         
-        <form method="POST" class="form">
+        <form method="POST" class="form" id="registration-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             
             <h3>Account Information</h3>
@@ -46,16 +83,15 @@
             
             <div class="form-group">
                 <label for="address">Delivery Address <span class="required">*</span></label>
-                <textarea id="address" name="address" required rows="2"
-                          placeholder="Full delivery address"></textarea>
-                <small>This is encrypted and only shared with your assigned volunteer.</small>
-            </div>
-            
-            <div class="form-group">
-                <label for="general_area">General Area</label>
-                <input type="text" id="general_area" name="general_area" 
-                       placeholder="e.g., North Sacramento, Midtown">
-                <small>Helps volunteers find requests in their area (not your exact location).</small>
+                <input type="text" id="address" name="address" required 
+                       placeholder="Start typing your address..."
+                       data-autocomplete="address"
+                       autocomplete="off">
+                <input type="hidden" id="address_place_id" name="address_place_id">
+                <input type="hidden" id="address_lat" name="address_lat">
+                <input type="hidden" id="address_lng" name="address_lng">
+                <div id="address_error" class="address-error"></div>
+                <small>Start typing and select your address from the dropdown. This is encrypted and only shared with your assigned volunteer.</small>
             </div>
             
             <div class="form-group">
@@ -80,4 +116,33 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registration-form');
+    const addressInput = document.getElementById('address');
+    const addressPlaceId = document.getElementById('address_place_id');
+    
+    form.addEventListener('submit', function(e) {
+        // Ensure address was selected from autocomplete
+        if (addressInput.value.trim() && !addressPlaceId.value) {
+            e.preventDefault();
+            const errorEl = document.getElementById('address_error');
+            errorEl.textContent = 'Please select your address from the dropdown.';
+            errorEl.style.display = 'block';
+            addressInput.classList.add('input-error');
+            addressInput.focus();
+            return false;
+        }
+    });
+    
+    // Clear error when address is selected
+    addressInput.addEventListener('placeSelected', function() {
+        document.getElementById('address_error').style.display = 'none';
+        addressInput.classList.remove('input-error');
+    });
+});
+</script>
 {% endblock %}

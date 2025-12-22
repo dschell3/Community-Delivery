@@ -60,6 +60,21 @@
     </footer>
     
     <script src="{{ url_for('static', filename='js/forms.js') }}"></script>
+    
+    {# Google Maps API - only load on pages that need it #}
+    {% if use_google_places %}
+    <script>
+        // Service area configuration for address validation
+        window.SERVICE_AREA_CONFIG = {
+            centerLat: {{ config.SERVICE_AREA_CENTER_LAT }},
+            centerLng: {{ config.SERVICE_AREA_CENTER_LNG }},
+            radiusMiles: {{ config.SERVICE_AREA_RADIUS_MILES }}
+        };
+    </script>
+    <script src="{{ url_for('static', filename='js/address-autocomplete.js') }}"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ config.GOOGLE_PLACES_API_KEY }}&libraries=places&callback=initGoogleMapsCallback" async defer></script>
+    {% endif %}
+    
     {% block extra_js %}{% endblock %}
 </body>
 </html>

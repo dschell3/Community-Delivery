@@ -1,6 +1,51 @@
 {% extends "base.html" %}
+{% set use_google_places = true %}
 
 {% block title %}Volunteer Application - Community Delivery Network{% endblock %}
+
+{% block extra_css %}
+<style>
+    .address-error {
+        color: var(--error-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+    
+    .input-error {
+        border-color: var(--error-color) !important;
+    }
+    
+    .pac-container {
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+        margin-top: 4px;
+    }
+    
+    .pac-item {
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+    }
+    
+    .pac-item:hover {
+        background: var(--background);
+    }
+    
+    .service-area-info {
+        background: var(--background);
+        border-radius: var(--radius);
+        padding: 1rem;
+        margin-top: 0.5rem;
+    }
+    
+    .service-area-info p {
+        margin: 0;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="auth-container">
@@ -9,7 +54,7 @@
         <p class="text-muted">Thank you for wanting to help! Please complete this application. 
            An admin will review it and verify your ID before approval.</p>
         
-        <form method="POST" enctype="multipart/form-data" class="form">
+        <form method="POST" enctype="multipart/form-data" class="form" id="volunteer-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             
             <h3>Account Information</h3>
@@ -51,11 +96,36 @@
                 <small>A clear photo of yourself. This helps recipients identify you.</small>
             </div>
             
+            <h3>Service Area</h3>
+            
             <div class="form-group">
-                <label for="service_area">Service Area <span class="required">*</span></label>
-                <input type="text" id="service_area" name="service_area" required 
-                       placeholder="e.g., North Sacramento, Midtown, Downtown">
-                <small>Areas where you're willing to make deliveries.</small>
+                <label for="service_center">Service Center Address <span class="required">*</span></label>
+                <input type="text" id="service_center" name="service_center" required 
+                       placeholder="Your home address or where you'll start deliveries..."
+                       data-autocomplete="address"
+                       autocomplete="off">
+                <input type="hidden" id="service_center_place_id" name="service_center_place_id">
+                <input type="hidden" id="service_center_lat" name="service_center_lat">
+                <input type="hidden" id="service_center_lng" name="service_center_lng">
+                <div id="service_center_error" class="address-error"></div>
+                <small>This is the center point for your delivery area. You'll see deliveries within your chosen radius.</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="service_radius">Service Radius <span class="required">*</span></label>
+                <select id="service_radius" name="service_radius" required>
+                    {% for radius in config.VOLUNTEER_RADIUS_OPTIONS %}
+                    <option value="{{ radius }}" {% if radius == 10 %}selected{% endif %}>
+                        {{ radius }} miles
+                        {% if radius == config.SERVICE_AREA_RADIUS_MILES %}(entire service area){% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+                <small>Both the store and recipient must be within this distance for you to see a delivery.</small>
+                
+                <div class="service-area-info">
+                    <p>💡 <strong>Tip:</strong> Start with a smaller radius. You can always expand it later in your settings if you want to help more people!</p>
+                </div>
             </div>
             
             <div class="form-group">
@@ -94,4 +164,33 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('volunteer-form');
+    const serviceCenterInput = document.getElementById('service_center');
+    const serviceCenterPlaceId = document.getElementById('service_center_place_id');
+    
+    form.addEventListener('submit', function(e) {
+        // Ensure service center was selected from autocomplete
+        if (serviceCenterInput.value.trim() && !serviceCenterPlaceId.value) {
+            e.preventDefault();
+            const errorEl = document.getElementById('service_center_error');
+            errorEl.textContent = 'Please select an address from the dropdown.';
+            errorEl.style.display = 'block';
+            serviceCenterInput.classList.add('input-error');
+            serviceCenterInput.focus();
+            return false;
+        }
+    });
+    
+    // Clear error when address is selected
+    serviceCenterInput.addEventListener('placeSelected', function() {
+        document.getElementById('service_center_error').style.display = 'none';
+        serviceCenterInput.classList.remove('input-error');
+    });
+});
+</script>
 {% endblock %}

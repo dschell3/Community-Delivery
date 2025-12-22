@@ -7,6 +7,7 @@ from models.recipient import Recipient
 from models.volunteer import Volunteer
 from services.audit_service import AuditService
 from services.encryption_service import get_encryption_service
+from services.geocoding_service import GeocodingService
 
 
 class DeliveryService:
@@ -14,7 +15,8 @@ class DeliveryService:
     
     @staticmethod
     def create_delivery(recipient, store_name, pickup_address, order_name, 
-                        pickup_time, estimated_items=None):
+                        pickup_time, estimated_items=None, 
+                        store_lat=None, store_lng=None, store_place_id=None):
         """Create a new delivery request."""
         delivery = Delivery(
             recipient_id=recipient.id,
@@ -25,6 +27,11 @@ class DeliveryService:
             estimated_items=estimated_items,
             status='open'
         )
+        
+        # Set store location if provided
+        if store_lat is not None and store_lng is not None:
+            delivery.set_store_location(store_lat, store_lng, store_place_id)
+        
         db.session.add(delivery)
         db.session.commit()
         
@@ -32,6 +39,14 @@ class DeliveryService:
         AuditService.log_delivery_created(delivery.id, recipient.id)
         
         return delivery
+    
+    @staticmethod
+    def get_available_deliveries(volunteer):
+        """
+        Get deliveries available to a specific volunteer based on their service area.
+        Both the store AND recipient must be within the volunteer's service radius.
+        """
+        return Delivery.get_available_for_volunteer(volunteer)
     
     @staticmethod
     def claim_delivery(delivery, volunteer):
@@ -42,6 +57,31 @@ class DeliveryService:
         max_claims = current_app.config.get('MAX_ACTIVE_CLAIMS_PER_VOLUNTEER', 2)
         if not volunteer.can_claim_delivery(max_claims):
             raise ValueError(f"You already have {max_claims} active deliveries")
+        
+        # Verify delivery is still within volunteer's service area
+        if volunteer.has_service_location:
+            # Check store distance
+            if delivery.store_latitude and delivery.store_longitude:
+                store_distance = GeocodingService.calculate_distance(
+                    float(volunteer.service_center_lat),
+                    float(volunteer.service_center_lng),
+                    float(delivery.store_latitude),
+                    float(delivery.store_longitude)
+                )
+                if store_distance > volunteer.service_radius_miles:
+                    raise ValueError("Store is outside your service area")
+            
+            # Check recipient distance
+            recipient = delivery.recipient
+            if recipient.latitude and recipient.longitude:
+                recipient_distance = GeocodingService.calculate_distance(
+                    float(volunteer.service_center_lat),
+                    float(volunteer.service_center_lng),
+                    float(recipient.latitude),
+                    float(recipient.longitude)
+                )
+                if recipient_distance > volunteer.service_radius_miles:
+                    raise ValueError("Recipient is outside your service area")
         
         delivery.volunteer_id = volunteer.id
         delivery.status = 'claimed'
@@ -199,21 +239,6 @@ class DeliveryService:
         )
         
         return delivery
-    
-    @staticmethod
-    def get_available_deliveries(service_area=None):
-        """Get open deliveries, optionally filtered by area."""
-        query = Delivery.query.filter(Delivery.status == 'open')
-        
-        if service_area:
-            query = query.join(Recipient).filter(
-                Recipient.general_area.ilike(f'%{service_area}%')
-            )
-        
-        return query.order_by(
-            Delivery.priority.desc(),
-            Delivery.pickup_time.asc()
-        ).all()
     
     @staticmethod
     def get_recipient_address(delivery, volunteer):

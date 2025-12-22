@@ -7,6 +7,7 @@ from models.delivery import Delivery
 from models.rating import Rating
 from services.delivery_service import DeliveryService
 from services.encryption_service import get_encryption_service
+from services.geocoding_service import GeocodingService
 from services.cleanup_service import delete_recipient_account
 from services.audit_service import AuditService
 
@@ -70,23 +71,29 @@ def request_new():
         return redirect(url_for('recipient.request_detail', id=active.id))
     
     if request.method == 'POST':
+        # Store info from autocomplete
         store_name = request.form.get('store_name', '').strip()
         pickup_address = request.form.get('pickup_address', '').strip()
+        store_place_id = request.form.get('store_place_id', '').strip()
+        store_lat = request.form.get('store_lat', '').strip()
+        store_lng = request.form.get('store_lng', '').strip()
+        
+        # Order details
         order_name = request.form.get('order_name', '').strip()
         pickup_time_str = request.form.get('pickup_time', '')
         estimated_items = request.form.get('estimated_items', '').strip() or None
         
         # Validation
         errors = []
-        if not store_name:
-            errors.append('Store name is required.')
-        if not pickup_address:
-            errors.append('Store address is required.')
+        
+        if not store_name and not pickup_address:
+            errors.append('Please select a store from the dropdown.')
         if not order_name:
             errors.append('Order name is required.')
         if not pickup_time_str:
             errors.append('Pickup time is required.')
         
+        # Parse pickup time
         pickup_time = None
         if pickup_time_str:
             try:
@@ -95,6 +102,31 @@ def request_new():
                     errors.append('Pickup time must be in the future.')
             except ValueError:
                 errors.append('Invalid pickup time format.')
+        
+        # Validate store address is within service area
+        validated_lat = None
+        validated_lng = None
+        
+        if store_place_id or pickup_address:
+            validation = GeocodingService.validate_store_address(
+                place_id=store_place_id,
+                address=pickup_address
+            )
+            
+            if not validation.get('valid'):
+                errors.append(validation.get('error', 'Invalid store address.'))
+            else:
+                validated_lat = validation.get('latitude')
+                validated_lng = validation.get('longitude')
+                
+                # Use store name from validation if we don't have one
+                if not store_name:
+                    store_name = validation.get('name', 'Unknown Store')
+                
+                # Use formatted address
+                pickup_address = validation.get('address', pickup_address)
+        else:
+            errors.append('Please select a store from the dropdown.')
         
         if errors:
             for error in errors:
@@ -108,7 +140,10 @@ def request_new():
             pickup_address=pickup_address,
             order_name=order_name,
             pickup_time=pickup_time,
-            estimated_items=estimated_items
+            estimated_items=estimated_items,
+            store_lat=validated_lat,
+            store_lng=validated_lng,
+            store_place_id=store_place_id
         )
         
         flash('Delivery request created successfully.', 'success')
@@ -225,8 +260,10 @@ def settings():
     if request.method == 'POST':
         display_name = request.form.get('display_name', '').strip()
         address = request.form.get('address', '').strip()
+        address_place_id = request.form.get('address_place_id', '').strip()
+        address_lat = request.form.get('address_lat', '').strip()
+        address_lng = request.form.get('address_lng', '').strip()
         phone = request.form.get('phone', '').strip() or None
-        general_area = request.form.get('general_area', '').strip() or None
         notes = request.form.get('notes', '').strip() or None
         
         # Validation
@@ -236,14 +273,46 @@ def settings():
         if not address:
             errors.append('Delivery address is required.')
         
+        # Validate address if changed
+        latitude = None
+        longitude = None
+        
+        if address_place_id:
+            # New address selected from autocomplete
+            validation = GeocodingService.validate_address_in_service_area(
+                place_id=address_place_id,
+                address=address
+            )
+            
+            if not validation.get('valid'):
+                errors.append(validation.get('error', 'Invalid address.'))
+            else:
+                latitude = validation.get('latitude')
+                longitude = validation.get('longitude')
+                address = validation.get('address', address)
+        elif address_lat and address_lng:
+            # Address not changed via autocomplete, use existing coords
+            latitude = float(address_lat) if address_lat else None
+            longitude = float(address_lng) if address_lng else None
+        else:
+            # No autocomplete selection and no existing coords
+            # Try to geocode the address
+            validation = GeocodingService.validate_address_in_service_area(address=address)
+            if validation.get('valid'):
+                latitude = validation.get('latitude')
+                longitude = validation.get('longitude')
+                address = validation.get('address', address)
+            else:
+                errors.append('Please select your address from the dropdown.')
+        
         if errors:
             for error in errors:
                 flash(error, 'error')
         else:
             recipient.display_name = display_name
             recipient.set_address(address, encryption_service)
+            recipient.set_location(latitude, longitude)
             recipient.set_phone(phone, encryption_service)
-            recipient.general_area = general_area
             recipient.set_notes(notes, encryption_service)
             
             db.session.commit()

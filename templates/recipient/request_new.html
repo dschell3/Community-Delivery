@@ -1,6 +1,83 @@
 {% extends "base.html" %}
+{% set use_google_places = true %}
 
 {% block title %}New Delivery Request - Community Delivery Network{% endblock %}
+
+{% block extra_css %}
+<style>
+    .address-error {
+        color: var(--error-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+    
+    .input-error {
+        border-color: var(--error-color) !important;
+    }
+    
+    .pac-container {
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+        margin-top: 4px;
+    }
+    
+    .pac-item {
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+    }
+    
+    /* Store confirmation modal */
+    .confirmation-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .confirmation-modal.active {
+        display: flex;
+    }
+    
+    .confirmation-content {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        max-width: 450px;
+        margin: 1rem;
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .confirmation-content h3 {
+        margin-top: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .confirmation-content .store-name {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+    
+    .confirmation-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .confirmation-buttons button {
+        flex: 1;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="auth-container">
@@ -8,22 +85,26 @@
         <h1>Request a Delivery</h1>
         <p class="text-muted">Enter the details of your grocery order pickup.</p>
         
-        <form method="POST" class="form">
+        <form method="POST" class="form" id="delivery-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             
             <h3>Store Information</h3>
             
             <div class="form-group">
-                <label for="store_name">Store Name <span class="required">*</span></label>
-                <input type="text" id="store_name" name="store_name" required 
-                       placeholder="e.g., Safeway, Walmart, Target">
-            </div>
-            
-            <div class="form-group">
-                <label for="pickup_address">Store Address <span class="required">*</span></label>
-                <input type="text" id="pickup_address" name="pickup_address" required 
-                       placeholder="Full address of the store">
-                <small>This is where the volunteer will pick up your order.</small>
+                <label for="store">Store <span class="required">*</span></label>
+                <input type="text" id="store" name="store_display" required 
+                       placeholder="Start typing store name or address..."
+                       data-autocomplete="store"
+                       autocomplete="off">
+                <input type="hidden" id="store_name" name="store_name">
+                <input type="hidden" id="store_place_id" name="store_place_id">
+                <input type="hidden" id="store_lat" name="store_lat">
+                <input type="hidden" id="store_lng" name="store_lng">
+                <input type="hidden" id="store_address" name="pickup_address">
+                <input type="hidden" id="store_types" name="store_types">
+                <input type="hidden" id="store_confirmed" name="store_confirmed" value="false">
+                <div id="store_error" class="address-error"></div>
+                <small>Search for the store by name or address. Select from the dropdown.</small>
             </div>
             
             <h3>Order Details</h3>
@@ -56,4 +137,129 @@
         </div>
     </div>
 </div>
+
+<!-- Store Type Confirmation Modal -->
+<div class="confirmation-modal" id="store_confirmation">
+    <div class="confirmation-content">
+        <h3>⚠️ Confirm Store</h3>
+        <p><span class="store-name" id="store_type_display">This location</span> doesn't appear to be a typical grocery store.</p>
+        <p>Are you sure this is where your grocery order will be picked up?</p>
+        <div class="confirmation-buttons">
+            <button type="button" id="store_cancel_btn" class="btn btn-secondary">No, Change Store</button>
+            <button type="button" id="store_confirm_btn" class="btn btn-primary">Yes, Continue</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('delivery-form');
+    const storeInput = document.getElementById('store');
+    const storePlaceId = document.getElementById('store_place_id');
+    const storeName = document.getElementById('store_name');
+    const storeAddress = document.getElementById('store_address');
+    const storeConfirmed = document.getElementById('store_confirmed');
+    const confirmationModal = document.getElementById('store_confirmation');
+    const storeTypeDisplay = document.getElementById('store_type_display');
+    const confirmBtn = document.getElementById('store_confirm_btn');
+    const cancelBtn = document.getElementById('store_cancel_btn');
+    
+    // Accepted store types (no confirmation needed)
+    const acceptedTypes = new Set([
+        'grocery_or_supermarket',
+        'supermarket',
+        'food',
+        'store',
+        'convenience_store',
+        'drugstore',
+        'department_store',
+        'shopping_mall',
+        'meal_delivery',
+        'meal_takeaway'
+    ]);
+    
+    let pendingSubmit = false;
+    
+    // Handle place selection
+    storeInput.addEventListener('placeSelected', function(e) {
+        const place = e.detail;
+        
+        // Store the address in the hidden field
+        storeAddress.value = place.address;
+        storeName.value = place.name;
+        storeConfirmed.value = 'false';
+        
+        // Check if it's a grocery-type store
+        const placeTypes = new Set(place.types);
+        const isGroceryType = [...placeTypes].some(t => acceptedTypes.has(t));
+        
+        if (!isGroceryType) {
+            // Show confirmation modal
+            storeTypeDisplay.textContent = place.name || 'This location';
+            confirmationModal.classList.add('active');
+        } else {
+            storeConfirmed.value = 'true';
+        }
+        
+        // Clear any errors
+        document.getElementById('store_error').style.display = 'none';
+        storeInput.classList.remove('input-error');
+    });
+    
+    // Confirm button
+    confirmBtn.addEventListener('click', function() {
+        storeConfirmed.value = 'true';
+        confirmationModal.classList.remove('active');
+        
+        if (pendingSubmit) {
+            pendingSubmit = false;
+            form.submit();
+        }
+    });
+    
+    // Cancel button
+    cancelBtn.addEventListener('click', function() {
+        confirmationModal.classList.remove('active');
+        storeConfirmed.value = 'false';
+        storePlaceId.value = '';
+        storeName.value = '';
+        storeAddress.value = '';
+        storeInput.value = '';
+        storeInput.focus();
+        pendingSubmit = false;
+    });
+    
+    // Close modal on backdrop click
+    confirmationModal.addEventListener('click', function(e) {
+        if (e.target === confirmationModal) {
+            cancelBtn.click();
+        }
+    });
+    
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        // Ensure store was selected from autocomplete
+        if (storeInput.value.trim() && !storePlaceId.value) {
+            e.preventDefault();
+            const errorEl = document.getElementById('store_error');
+            errorEl.textContent = 'Please select a store from the dropdown.';
+            errorEl.style.display = 'block';
+            storeInput.classList.add('input-error');
+            storeInput.focus();
+            return false;
+        }
+        
+        // If non-grocery store not yet confirmed, show modal
+        if (storeConfirmed.value !== 'true' && storePlaceId.value) {
+            e.preventDefault();
+            pendingSubmit = true;
+            storeTypeDisplay.textContent = storeName.value || 'This location';
+            confirmationModal.classList.add('active');
+            return false;
+        }
+    });
+});
+</script>
 {% endblock %}

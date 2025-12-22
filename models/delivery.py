@@ -11,9 +11,13 @@ class Delivery(db.Model):
     recipient_id = db.Column(db.Integer, db.ForeignKey('recipients.id'), nullable=False)
     volunteer_id = db.Column(db.Integer, db.ForeignKey('volunteers.id'), nullable=True)
     
-    # Pickup details
+    # Store/Pickup details
     store_name = db.Column(db.String(255), nullable=False)
     pickup_address = db.Column(db.String(500), nullable=False)  # Store address (not sensitive)
+    store_place_id = db.Column(db.String(255), nullable=True)   # Google Place ID for reference
+    store_latitude = db.Column(db.Numeric(8, 5), nullable=True, index=True)
+    store_longitude = db.Column(db.Numeric(9, 5), nullable=True, index=True)
+    
     order_name = db.Column(db.String(255), nullable=False)  # Name the order is under
     pickup_time = db.Column(db.DateTime, nullable=False)
     estimated_items = db.Column(db.String(100), nullable=True)  # "About 10 items", "2 bags"
@@ -74,6 +78,14 @@ class Delivery(db.Model):
     @property
     def can_be_canceled(self):
         return self.status in ['open', 'claimed', 'picked_up']
+    
+    def set_store_location(self, latitude, longitude, place_id=None):
+        """Set the store's location."""
+        if latitude is not None and longitude is not None:
+            self.store_latitude = float(latitude)
+            self.store_longitude = float(longitude)
+        if place_id:
+            self.store_place_id = place_id
     
     def claim(self, volunteer):
         """Claim this delivery for a volunteer."""
@@ -154,17 +166,49 @@ class Delivery(db.Model):
         db.session.commit()
     
     @classmethod
-    def get_available(cls, service_area=None):
-        """Get available deliveries, optionally filtered by service area."""
-        query = cls.query.filter(cls.status == 'open')
+    def get_available_for_volunteer(cls, volunteer):
+        """Get available deliveries within volunteer's service area."""
+        from services.geocoding_service import GeocodingService
         
-        if service_area:
-            # Could add more sophisticated area matching later
-            query = query.join(Recipient).filter(
-                Recipient.general_area.ilike(f'%{service_area}%')
-            )
+        if not volunteer.has_service_location:
+            # Volunteer hasn't set up service area yet
+            return []
         
-        return query.order_by(cls.priority.desc(), cls.created_at.asc()).all()
+        # Get all open deliveries
+        open_deliveries = cls.query.filter(cls.status == 'open').all()
+        
+        # Filter by distance to both store and recipient
+        available = []
+        for delivery in open_deliveries:
+            # Check store distance
+            if delivery.store_latitude and delivery.store_longitude:
+                store_distance = GeocodingService.calculate_distance(
+                    float(volunteer.service_center_lat),
+                    float(volunteer.service_center_lng),
+                    float(delivery.store_latitude),
+                    float(delivery.store_longitude)
+                )
+                if store_distance > volunteer.service_radius_miles:
+                    continue
+            
+            # Check recipient distance
+            recipient = delivery.recipient
+            if recipient.latitude and recipient.longitude:
+                recipient_distance = GeocodingService.calculate_distance(
+                    float(volunteer.service_center_lat),
+                    float(volunteer.service_center_lng),
+                    float(recipient.latitude),
+                    float(recipient.longitude)
+                )
+                if recipient_distance > volunteer.service_radius_miles:
+                    continue
+            
+            available.append(delivery)
+        
+        # Sort by priority (descending) then created_at (ascending)
+        available.sort(key=lambda d: (-d.priority, d.created_at))
+        
+        return available
     
     def __repr__(self):
         return f'<Delivery {self.id} ({self.status})>'

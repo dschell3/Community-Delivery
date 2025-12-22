@@ -1,13 +1,47 @@
 {% extends "base.html" %}
+{% set use_google_places = true %}
 
 {% block title %}Settings - Community Delivery Network{% endblock %}
+
+{% block extra_css %}
+<style>
+    .address-error {
+        color: var(--error-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+    
+    .input-error {
+        border-color: var(--error-color) !important;
+    }
+    
+    .pac-container {
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+        margin-top: 4px;
+    }
+    
+    .current-service-area {
+        background: var(--background);
+        border-radius: var(--radius);
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .current-service-area p {
+        margin: 0.25rem 0;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="auth-container">
     <div class="auth-card">
         <h1>Volunteer Settings</h1>
         
-        <form method="POST" enctype="multipart/form-data" class="form">
+        <form method="POST" enctype="multipart/form-data" class="form" id="settings-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             
             <h3>Profile</h3>
@@ -24,15 +58,45 @@
                 <small>Upload a new photo to replace your current one.</small>
             </div>
             
-            <h3>Availability</h3>
+            <h3>Service Area</h3>
+            
+            {% if volunteer.service_center_address %}
+            <div class="current-service-area">
+                <p><strong>Current:</strong> {{ volunteer.service_center_address }}</p>
+                <p><strong>Radius:</strong> {{ volunteer.service_radius_miles }} miles</p>
+            </div>
+            {% endif %}
             
             <div class="form-group">
-                <label for="service_area">Service Area <span class="required">*</span></label>
-                <input type="text" id="service_area" name="service_area" required 
-                       value="{{ volunteer.service_area }}"
-                       placeholder="e.g., North Sacramento, Midtown, Downtown">
-                <small>Areas where you're willing to make deliveries.</small>
+                <label for="service_center">Service Center Address <span class="required">*</span></label>
+                <input type="text" id="service_center" name="service_center" required 
+                       value="{{ volunteer.service_center_address or '' }}"
+                       placeholder="Your home address or where you'll start deliveries..."
+                       data-autocomplete="address"
+                       autocomplete="off">
+                <input type="hidden" id="service_center_place_id" name="service_center_place_id">
+                <input type="hidden" id="service_center_lat" name="service_center_lat" 
+                       value="{{ volunteer.service_center_lat or '' }}">
+                <input type="hidden" id="service_center_lng" name="service_center_lng"
+                       value="{{ volunteer.service_center_lng or '' }}">
+                <div id="service_center_error" class="address-error"></div>
+                <small>This is the center point for your delivery area.</small>
             </div>
+            
+            <div class="form-group">
+                <label for="service_radius">Service Radius <span class="required">*</span></label>
+                <select id="service_radius" name="service_radius" required>
+                    {% for radius in config.VOLUNTEER_RADIUS_OPTIONS %}
+                    <option value="{{ radius }}" {% if radius == volunteer.service_radius_miles %}selected{% endif %}>
+                        {{ radius }} miles
+                        {% if radius == config.SERVICE_AREA_RADIUS_MILES %}(entire service area){% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+                <small>Both the store and recipient must be within this distance for you to see a delivery.</small>
+            </div>
+            
+            <h3>Availability</h3>
             
             <div class="form-group">
                 <label for="availability_notes">Availability Notes</label>
@@ -53,4 +117,48 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('settings-form');
+    const serviceCenterInput = document.getElementById('service_center');
+    const serviceCenterPlaceId = document.getElementById('service_center_place_id');
+    const serviceCenterLat = document.getElementById('service_center_lat');
+    const serviceCenterLng = document.getElementById('service_center_lng');
+    
+    // Track if user has modified the address
+    let addressModified = false;
+    
+    serviceCenterInput.addEventListener('input', function() {
+        addressModified = true;
+    });
+    
+    form.addEventListener('submit', function(e) {
+        // If address was modified, ensure it was selected from autocomplete
+        if (addressModified && serviceCenterInput.value.trim() && !serviceCenterPlaceId.value) {
+            e.preventDefault();
+            const errorEl = document.getElementById('service_center_error');
+            errorEl.textContent = 'Please select an address from the dropdown.';
+            errorEl.style.display = 'block';
+            serviceCenterInput.classList.add('input-error');
+            serviceCenterInput.focus();
+            return false;
+        }
+        
+        // If address wasn't modified but we have existing lat/lng, that's fine
+        if (!addressModified && serviceCenterLat.value && serviceCenterLng.value) {
+            return true;
+        }
+    });
+    
+    // Clear error when address is selected
+    serviceCenterInput.addEventListener('placeSelected', function() {
+        document.getElementById('service_center_error').style.display = 'none';
+        serviceCenterInput.classList.remove('input-error');
+        addressModified = false; // Selected valid address
+    });
+});
+</script>
 {% endblock %}

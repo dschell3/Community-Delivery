@@ -30,8 +30,42 @@ class Config:
     MESSAGE_POLL_INTERVAL_SECONDS = 10
     INACTIVE_ACCOUNT_PURGE_MONTHS = 18
     
-    # Email notifications (Resend)
-    # If RESEND_API_KEY is not set, notifications will be logged but not sent
+    # ===========================================
+    # Service Area Configuration
+    # ===========================================
+    # Center point for service area (Sacramento, CA)
+    SERVICE_AREA_CENTER_LAT = float(os.environ.get('SERVICE_AREA_CENTER_LAT', 38.5816))
+    SERVICE_AREA_CENTER_LNG = float(os.environ.get('SERVICE_AREA_CENTER_LNG', -121.4944))
+    
+    # Maximum radius from center point (miles)
+    SERVICE_AREA_RADIUS_MILES = int(os.environ.get('SERVICE_AREA_RADIUS_MILES', 50))
+    
+    # Volunteer radius dropdown options (miles)
+    VOLUNTEER_RADIUS_OPTIONS = [5, 10, 15, 25, 50]
+    
+    # ===========================================
+    # Google Places API
+    # ===========================================
+    GOOGLE_PLACES_API_KEY = os.environ.get('GOOGLE_PLACES_API_KEY')
+    
+    # Place types we consider "grocery-like" (no confirmation needed)
+    # See: https://developers.google.com/maps/documentation/places/web-service/supported_types
+    ACCEPTED_STORE_TYPES = {
+        'grocery_or_supermarket',
+        'supermarket',
+        'food',
+        'store',
+        'convenience_store',
+        'drugstore',  # Many have grocery sections
+        'department_store',  # Walmart, Target, etc.
+        'shopping_mall',  # Contains grocery stores
+        'meal_delivery',
+        'meal_takeaway',
+    }
+    
+    # ===========================================
+    # Email Notifications (Resend)
+    # ===========================================
     RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
     NOTIFICATION_FROM_EMAIL = os.environ.get('NOTIFICATION_FROM_EMAIL', 'Community Delivery <noreply@yourdomain.com>')
     APP_URL = os.environ.get('APP_URL', 'http://localhost:5000')
@@ -42,7 +76,7 @@ class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'DATABASE_URL', 
-        'mysql+pymysql://root:password@localhost:3306/community_delivery_dev'
+        'sqlite:///community_delivery.db'  # SQLite for easier local dev
     )
     SESSION_COOKIE_SECURE = False  # Allow HTTP in development
 

@@ -7,6 +7,7 @@ from models.user import User
 from models.recipient import Recipient
 from models.volunteer import Volunteer
 from services.encryption_service import get_encryption_service
+from services.geocoding_service import GeocodingService
 from services.audit_service import AuditService
 
 bp = Blueprint('auth', __name__)
@@ -68,7 +69,7 @@ def register():
 
 @bp.route('/register/recipient', methods=['GET', 'POST'])
 def register_recipient():
-    """Recipient registration."""
+    """Recipient registration with address geocoding."""
     if current_user.is_authenticated:
         return redirect(url_for('auth.dashboard_redirect'))
     
@@ -79,8 +80,12 @@ def register_recipient():
         display_name = request.form.get('display_name', '').strip()
         address = request.form.get('address', '').strip()
         phone = request.form.get('phone', '').strip() or None
-        general_area = request.form.get('general_area', '').strip() or None
         notes = request.form.get('notes', '').strip() or None
+        
+        # Geocoding data from autocomplete
+        address_place_id = request.form.get('address_place_id', '').strip()
+        address_lat = request.form.get('address_lat', '').strip()
+        address_lng = request.form.get('address_lng', '').strip()
         
         # Validation
         errors = []
@@ -96,6 +101,26 @@ def register_recipient():
             errors.append('Delivery address is required.')
         if User.query.filter_by(email=email).first():
             errors.append('An account with this email already exists.')
+        
+        # Validate address is within service area
+        latitude = None
+        longitude = None
+        
+        if address_place_id or address:
+            validation = GeocodingService.validate_address_in_service_area(
+                place_id=address_place_id,
+                address=address
+            )
+            
+            if not validation.get('valid'):
+                errors.append(validation.get('error', 'Invalid address.'))
+            else:
+                latitude = validation.get('latitude')
+                longitude = validation.get('longitude')
+                # Use the formatted address from Google
+                address = validation.get('address', address)
+        else:
+            errors.append('Please select your address from the dropdown.')
         
         if errors:
             for error in errors:
@@ -116,9 +141,13 @@ def register_recipient():
         recipient = Recipient(
             user_id=user.id,
             display_name=display_name,
-            address_encrypted=encryption_service.encrypt(address),
-            general_area=general_area
+            address_encrypted=encryption_service.encrypt(address)
         )
+        
+        # Set fuzzy location for distance-based matching
+        if latitude and longitude:
+            recipient.set_location(latitude, longitude)
+        
         if phone:
             recipient.phone_encrypted = encryption_service.encrypt(phone)
         if notes:

@@ -12,8 +12,13 @@ class Volunteer(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
     full_name = db.Column(db.String(255), nullable=False)
     photo_path = db.Column(db.String(500), nullable=True)
-    service_area = db.Column(db.String(255), nullable=False)
     availability_notes = db.Column(db.Text, nullable=True)
+    
+    # Service area: center point + radius
+    service_center_address = db.Column(db.String(500), nullable=True)  # Human-readable address
+    service_center_lat = db.Column(db.Numeric(8, 5), nullable=True, index=True)  # Full precision for center
+    service_center_lng = db.Column(db.Numeric(9, 5), nullable=True, index=True)
+    service_radius_miles = db.Column(db.Integer, default=10, nullable=False)  # Radius in miles
     
     # Vetting fields
     status = db.Column(
@@ -53,6 +58,11 @@ class Volunteer(db.Model):
         return self.status == 'suspended'
     
     @property
+    def has_service_location(self):
+        """Check if volunteer has set up their service area."""
+        return self.service_center_lat is not None and self.service_center_lng is not None
+    
+    @property
     def active_claims_count(self):
         """Count of currently active (claimed or in-progress) deliveries."""
         return self.deliveries.filter(
@@ -66,6 +76,13 @@ class Volunteer(db.Model):
         if max_claims is None:
             max_claims = current_app.config.get('MAX_ACTIVE_CLAIMS_PER_VOLUNTEER', 2)
         return self.active_claims_count < max_claims
+    
+    def set_service_center(self, address, latitude, longitude, radius_miles):
+        """Set the volunteer's service center location and radius."""
+        self.service_center_address = address
+        self.service_center_lat = float(latitude) if latitude else None
+        self.service_center_lng = float(longitude) if longitude else None
+        self.service_radius_miles = int(radius_miles) if radius_miles else 10
     
     @property
     def active_deliveries(self):

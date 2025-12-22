@@ -13,8 +13,13 @@ class Recipient(db.Model):
     display_name = db.Column(db.String(100), nullable=False)
     address_encrypted = db.Column(db.Text, nullable=False)
     phone_encrypted = db.Column(db.String(255), nullable=True)
-    general_area = db.Column(db.String(100), nullable=True)  # Non-sensitive area for matching
     notes_encrypted = db.Column(db.Text, nullable=True)  # Delivery instructions
+    
+    # Fuzzy location for distance-based matching (2 decimal places ≈ 0.7 mile accuracy)
+    # This allows geographic queries without exposing exact address
+    latitude = db.Column(db.Numeric(5, 2), nullable=True, index=True)
+    longitude = db.Column(db.Numeric(6, 2), nullable=True, index=True)
+    
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     deleted_at = db.Column(db.DateTime, nullable=True, index=True)
     
@@ -35,6 +40,15 @@ class Recipient(db.Model):
     def set_address(self, address, encryption_service):
         """Encrypt and store address."""
         self.address_encrypted = encryption_service.encrypt(address)
+    
+    def set_location(self, latitude, longitude):
+        """Store fuzzy location (rounded to 2 decimal places for privacy)."""
+        if latitude is not None and longitude is not None:
+            self.latitude = round(float(latitude), 2)
+            self.longitude = round(float(longitude), 2)
+        else:
+            self.latitude = None
+            self.longitude = None
     
     def get_phone(self, encryption_service):
         """Decrypt and return phone."""
