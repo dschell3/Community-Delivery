@@ -4,6 +4,56 @@
 
 {% block extra_css %}
 <style>
+    /* Remove header border on landing page */
+    .navbar {
+        border-bottom: none;
+    }
+    
+    /* Base background - subtle gradient foundation */
+    body {
+        background: linear-gradient(to bottom right, #ffffff 0%, rgba(239, 246, 255, 0.2) 50%, rgba(254, 243, 230, 0.2) 100%);
+    }
+    
+    /* Animated background container */
+    .animated-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+        overflow: hidden;
+    }
+    
+    /* Individual floating blobs */
+    .blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0;
+        animation: float-blob 20s ease-in-out infinite;
+    }
+    
+    @keyframes float-blob {
+        0%, 100% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0.7;
+        }
+        25% {
+            transform: translate(30px, -40px) scale(1.1);
+            opacity: 0.85;
+        }
+        50% {
+            transform: translate(-20px, 20px) scale(0.95);
+            opacity: 0.6;
+        }
+        75% {
+            transform: translate(40px, 30px) scale(1.05);
+            opacity: 0.75;
+        }
+    }
+    
     /* Hero Section - Modern SaaS Style */
     .hero {
         display: grid;
@@ -20,22 +70,33 @@
     }
     
     .hero-content h1 {
-        font-size: 3rem;
-        margin-bottom: 0.5rem;
+        font-size: 3.5rem;
+        margin-bottom: 0.25rem;
         line-height: 1.1;
+        font-weight: 700;
+    }
+    
+    /* Gradient text effect for the title */
+    .gradient-text {
+        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #f97316 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
     
     .hero-tagline {
-        font-size: 1.5rem;
+        font-size: 1.75rem;
         color: var(--text-muted);
-        margin-bottom: 0.5rem;
+        margin-bottom: 1rem;
         font-style: italic;
     }
     
     .hero-subtitle {
-        font-size: 1.25rem;
+        font-size: 1.35rem;
         color: var(--text-muted);
         margin-bottom: 2rem;
+        line-height: 1.6;
+        max-width: 500px;
     }
     
     .hero-actions {
@@ -125,7 +186,8 @@
     
     /* How It Works Summary */
     .how-it-works-summary {
-        background: var(--surface);
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
         border-radius: var(--radius-lg);
         padding: 3rem 2rem;
         max-width: 900px;
@@ -163,7 +225,8 @@
     }
     
     .cta-card {
-        background: var(--surface);
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
         border-radius: var(--radius-lg);
         padding: 2rem;
         text-align: center;
@@ -233,7 +296,16 @@
         }
         
         .hero-content h1 {
-            font-size: 2.25rem;
+            font-size: 2.5rem;
+        }
+        
+        .hero-tagline {
+            font-size: 1.25rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.1rem;
+            max-width: 100%;
         }
         
         .hero-actions {
@@ -262,11 +334,14 @@
 {% endblock %}
 
 {% block content %}
+<!-- Animated background with floating blobs -->
+<div class="animated-bg" id="animated-bg"></div>
+
 <div class="landing">
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <h1>Aquí Estamos</h1>
+            <h1><span class="gradient-text">Aquí Estamos</span></h1>
             <p class="hero-tagline">"We are here for you"</p>
             <p class="hero-subtitle">
                 Connecting neighbors to help each other with grocery delivery. 
@@ -371,4 +446,47 @@
         </div>
     </section>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('animated-bg');
+    if (!container) return;
+    
+    // Blob configuration - colors and positions scattered across the page
+    const blobs = [
+        // Blues - scattered across left and center
+        { color: 'rgba(96, 165, 250, 0.45)', size: 400, x: 5, y: 30, delay: 0 },
+        { color: 'rgba(147, 197, 253, 0.4)', size: 350, x: 20, y: 60, delay: 2 },
+        { color: 'rgba(191, 219, 254, 0.45)', size: 450, x: 45, y: 25, delay: 4 },
+        { color: 'rgba(96, 165, 250, 0.35)', size: 380, x: 30, y: 80, delay: 6 },
+        { color: 'rgba(147, 197, 253, 0.4)', size: 420, x: 60, y: 55, delay: 8 },
+        
+        // Warm tones - right side accents (boosted opacity)
+        { color: 'rgba(254, 205, 150, 0.5)', size: 380, x: 75, y: 20, delay: 3 },
+        { color: 'rgba(253, 186, 116, 0.45)', size: 350, x: 88, y: 50, delay: 5 },
+        { color: 'rgba(254, 215, 170, 0.45)', size: 400, x: 70, y: 75, delay: 7 },
+        
+        // Additional light blues for depth
+        { color: 'rgba(191, 219, 254, 0.35)', size: 320, x: 10, y: 85, delay: 9 },
+        { color: 'rgba(147, 197, 253, 0.3)', size: 400, x: 50, y: 90, delay: 11 },
+    ];
+    
+    blobs.forEach((config, index) => {
+        const blob = document.createElement('div');
+        blob.className = 'blob';
+        blob.style.cssText = `
+            width: ${config.size}px;
+            height: ${config.size}px;
+            background: ${config.color};
+            left: ${config.x}%;
+            top: ${config.y}%;
+            animation-delay: -${config.delay}s;
+            animation-duration: ${18 + (index % 5) * 2}s;
+        `;
+        container.appendChild(blob);
+    });
+});
+</script>
 {% endblock %}
