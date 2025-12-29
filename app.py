@@ -8,10 +8,6 @@ from flask_migrate import Migrate
 
 from config import config
 
-print("=" * 50)
-print("GOOGLE_PLACES_API_KEY:", os.environ.get('GOOGLE_PLACES_API_KEY', 'NOT SET'))
-print("=" * 50)
-
 # Initialize extensions (without app)
 db = SQLAlchemy()
 login_manager = LoginManager()

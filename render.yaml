@@ -16,6 +16,8 @@ services:
       python seed_demo.py
     startCommand: gunicorn app:app
     envVars:
+      - key: DATABASE_URL
+        value: sqlite:///community_delivery.db
       - key: FLASK_ENV
         value: production
       - key: SECRET_KEY
