@@ -1,0 +1,36 @@
+# Render Blueprint for Aquí Estamos
+# One-click deploy: https://render.com/deploy
+#
+# This configuration deploys the app with SQLite (ephemeral storage).
+# Demo data is seeded on each deploy, making it perfect for portfolio demos.
+# For production use, switch to PostgreSQL.
+
+services:
+  - type: web
+    name: aqui-estamos
+    runtime: python
+    plan: free
+    buildCommand: |
+      pip install -r requirements.txt
+      python -c "from app import app, db; app.app_context().push(); db.create_all()"
+      python seed_demo.py
+    startCommand: gunicorn app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ENCRYPTION_KEY
+        generateValue: true
+      - key: GOOGLE_PLACES_API_KEY
+        sync: false  # User must set this manually in Render dashboard
+      - key: RESEND_API_KEY
+        sync: false  # Optional - emails won't send without it
+      - key: APP_URL
+        value: https://aqui-estamos.onrender.com
+      - key: SESSION_COOKIE_SECURE
+        value: "True"
+      - key: NOTIFICATION_FROM_EMAIL
+        value: "Aquí Estamos <noreply@aqui-estamos.onrender.com>"
+    healthCheckPath: /
+    autoDeploy: true
