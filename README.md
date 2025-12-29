@@ -1,5 +1,55 @@
 # Aquí Estamos
 
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen?style=for-the-badge)](https://aqui-estamos.onrender.com)
+[![Deploy to Render](https://img.shields.io/badge/Deploy%20to-Render-46E3B7?style=for-the-badge&logo=render)](https://render.com/deploy?repo=https://github.com/dschell3/Community-Delivery)
+
+**🔗 Live Demo: [https://aqui-estamos.onrender.com](https://aqui-estamos.onrender.com)**
+
+> *"We are here"* — A privacy-first community delivery platform connecting volunteers with neighbors who need grocery delivery assistance.
+
+---
+
+## Demo Credentials
+
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | `admin@demo.aquiestamos.org` | `demo2025` |
+| **Volunteer** (approved) | `carlos.v@demo.aquiestamos.org` | `demo2025` |
+| **Volunteer** (approved) | `sarah.v@demo.aquiestamos.org` | `demo2025` |
+| **Volunteer** (pending) | `pending.v@demo.aquiestamos.org` | `demo2025` |
+| **Recipient** | `maria.r@demo.aquiestamos.org` | `demo2025` |
+| **Recipient** | `jose.r@demo.aquiestamos.org` | `demo2025` |
+
+> ⚠️ **Note**: Demo uses SQLite with ephemeral storage. Data resets on each deploy.
+
+---
+
+## Quick Start (Local Development)
+
+```bash
+# Clone and setup
+git clone https://github.com/dschell3/Community-Delivery.git
+cd Community-Delivery
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your GOOGLE_PLACES_API_KEY
+
+# Initialize and seed
+python -c "from app import app, db; app.app_context().push(); db.create_all()"
+python seed_demo.py
+
+# Run
+flask run
+```
+
+---
+
+## About This Project
+
 A coordination platform connecting immigrants with local volunteers for grocery pickup and delivery. Designed to minimize exposure risk for vulnerable community members while maintaining accountability and trust.
 
 **This platform does not handle payments.** Recipients place and pay for their own grocery orders (pickup option), and volunteers simply deliver the items.
