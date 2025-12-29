@@ -70,7 +70,7 @@
     }
     
     .hero-content h1 {
-        font-size: 3.5rem;
+        font-size: 4.5rem;  /* Increased from 3.5rem */
         margin-bottom: 0.25rem;
         line-height: 1.1;
         font-weight: 700;
@@ -85,14 +85,14 @@
     }
     
     .hero-tagline {
-        font-size: 1.75rem;
+        font-size: 2.25rem;  /* Increased from 1.75rem */
         color: var(--text-muted);
-        margin-bottom: 1rem;
+        margin-bottom: 1.25rem;
         font-style: italic;
     }
     
     .hero-subtitle {
-        font-size: 1.35rem;
+        font-size: 1.5rem;  /* Increased from 1.35rem */
         color: var(--text-muted);
         margin-bottom: 2rem;
         line-height: 1.6;
@@ -117,96 +117,267 @@
         max-height: 400px;
     }
     
-    /* Feature Sections - Cascading Layout */
-    .feature-section {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 4rem;
-        align-items: center;
-        padding: 4rem 1rem;
-        max-width: 1100px;
+    /* Trust Badges - Below Hero */
+    .trust-section {
+        text-align: center;
+        padding: 2rem 1rem 3rem;
+        max-width: 900px;
         margin: 0 auto;
     }
     
-    .feature-section.reverse {
+    .trust-badges {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+    
+    .trust-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--text-muted);
+        font-size: 1.25rem;  /* Increased from 0.9375rem */
+    }
+    
+    .trust-badge-icon {
+        font-size: 1.75rem;  /* Increased from 1.25rem */
+    }
+    
+    /* =============================================
+       HOW IT WORKS - Card-based design
+       ============================================= */
+    .how-it-works {
+        padding: 4rem 1rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        scroll-margin-top: 100px;  /* Offset for sticky header */
+    }
+    
+    .how-it-works-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .how-it-works-header h2 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--text);
+    }
+    
+    .how-it-works-header p {
+        font-size: 1.125rem;
+        color: var(--text-muted);
+    }
+    
+    /* Steps Grid */
+    .steps-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+    }
+    
+    .step-card {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        border: 1px solid var(--border);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .step-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    /* Alternate card layouts */
+    .step-card:nth-child(odd) {
+        grid-column: 1 / -1;
+    }
+    
+    .step-card:nth-child(even) {
+        grid-column: 1 / -1;
         direction: rtl;
     }
     
-    .feature-section.reverse > * {
+    .step-card:nth-child(even) > * {
         direction: ltr;
     }
     
-    .feature-content {
-        padding: 1rem;
-    }
-    
-    .feature-content .feature-label {
-        display: inline-block;
-        background: var(--primary-color);
-        color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 1rem;
-    }
-    
-    .feature-content h2 {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-    }
-    
-    .feature-content p {
-        font-size: 1.125rem;
-        color: var(--text-muted);
-        line-height: 1.7;
-    }
-    
-    .feature-image {
+    .step-visual {
+        position: relative;
+        padding: 2rem;
         display: flex;
         justify-content: center;
         align-items: center;
+        min-height: 280px;
     }
     
-    .feature-image img {
+    .step-visual img {
         max-width: 100%;
-        height: auto;
-        max-height: 320px;
+        max-height: 220px;
+        object-fit: contain;
     }
     
-    /* Divider */
-    .section-divider {
-        max-width: 1100px;
+    .step-icon {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+    
+    .step-icon.blue { background: #3b82f6; }
+    .step-icon.green { background: #22c55e; }
+    .step-icon.purple { background: #8b5cf6; }
+    .step-icon.orange { background: #f97316; }
+    
+    .step-content {
+        padding: 2rem;
+    }
+    
+    .step-number {
+        font-size: 3rem;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+        position: relative;
+        display: inline-block;
+    }
+    
+    /* Step number colors - match icons */
+    .step-number.blue { color: #3b82f6; }
+    .step-number.green { color: #22c55e; }
+    .step-number.purple { color: #8b5cf6; }
+    .step-number.orange { color: #f97316; }
+
+    .step-number::after {
+        content: '';
+        position: absolute;
+        bottom: 0.25rem;
+        left: 100%;
+        width: 40px;
+        height: 3px;
+        margin-left: 0.5rem;
+    }
+    
+    /* Step number underline colors */
+    .step-number.blue::after { background: linear-gradient(90deg, #3b82f6, transparent); }
+    .step-number.green::after { background: linear-gradient(90deg, #22c55e, transparent); }
+    .step-number.purple::after { background: linear-gradient(90deg, #8b5cf6, transparent); }
+    .step-number.orange::after { background: linear-gradient(90deg, #f97316, transparent); }
+    
+    .step-content h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .step-content p {
+        color: var(--text-muted);
+        font-size: 1rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+    
+    /* Visual backgrounds for each step */
+    .step-visual.bg-blue { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); }
+    .step-visual.bg-green { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); }
+    .step-visual.bg-purple { background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); }
+    .step-visual.bg-orange { background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); }
+    
+    /* =============================================
+       LOCAL RESOURCES Section
+       ============================================= */
+    .resources-section {
+        padding: 4rem 1rem;
+        max-width: 1000px;
         margin: 0 auto;
-        border: none;
-        border-top: 1px solid var(--border);
     }
     
-    /* How It Works Summary */
-    .how-it-works-summary {
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(10px);
-        border-radius: var(--radius-lg);
-        padding: 3rem 2rem;
-        max-width: 900px;
-        margin: 2rem auto;
+    .resources-header {
         text-align: center;
+        margin-bottom: 2rem;
     }
     
-    .how-it-works-summary h2 {
+    .resources-header h2 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .resources-header p {
+        color: var(--text-muted);
+        font-size: 1.125rem;
+    }
+    
+    .resources-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .resource-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .resource-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .resource-icon {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .resource-card h3 {
+        font-size: 1.125rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .resource-card p {
+        color: var(--text-muted);
+        font-size: 0.9375rem;
         margin-bottom: 1rem;
     }
     
-    .how-it-works-summary p {
-        font-size: 1.125rem;
-        color: var(--text-muted);
-        max-width: 700px;
-        margin: 0 auto;
+    .resource-links {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
     }
     
-    /* CTA Section */
+    .resource-links a {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--primary-color);
+        font-size: 0.875rem;
+    }
+    
+    .resource-links a:hover {
+        text-decoration: underline;
+    }
+    
+    /* =============================================
+       CTA Section
+       ============================================= */
     .cta-section {
         padding: 4rem 1rem;
         max-width: 1000px;
@@ -249,35 +420,27 @@
         margin-bottom: 1.5rem;
     }
     
-    /* Trust Badges */
-    .trust-section {
-        text-align: center;
-        padding: 2rem 1rem 3rem;
-        max-width: 800px;
-        margin: 0 auto;
+    /* =============================================
+       Responsive Design
+       ============================================= */
+    @media (max-width: 900px) {
+        .steps-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .step-card,
+        .step-card:nth-child(odd),
+        .step-card:nth-child(even) {
+            grid-column: 1;
+            grid-template-columns: 1fr;
+            direction: ltr;
+        }
+        
+        .step-visual {
+            min-height: 200px;
+        }
     }
     
-    .trust-badges {
-        display: flex;
-        justify-content: center;
-        gap: 2rem;
-        flex-wrap: wrap;
-        margin-top: 1rem;
-    }
-    
-    .trust-badge {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: var(--text-muted);
-        font-size: 0.9375rem;
-    }
-    
-    .trust-badge-icon {
-        font-size: 1.25rem;
-    }
-    
-    /* Responsive */
     @media (max-width: 768px) {
         .hero {
             grid-template-columns: 1fr;
@@ -296,11 +459,11 @@
         }
         
         .hero-content h1 {
-            font-size: 2.5rem;
+            font-size: 3rem;
         }
         
         .hero-tagline {
-            font-size: 1.25rem;
+            font-size: 1.5rem;
         }
         
         .hero-subtitle {
@@ -312,22 +475,28 @@
             justify-content: center;
         }
         
-        .feature-section {
-            grid-template-columns: 1fr;
-            gap: 2rem;
-            padding: 2rem 1rem;
+        .trust-badge {
+            font-size: 1rem;
         }
         
-        .feature-section.reverse {
-            direction: ltr;
+        .trust-badge-icon {
+            font-size: 1.25rem;
         }
         
-        .feature-image {
-            order: -1;
+        .how-it-works-header h2 {
+            font-size: 2rem;
         }
         
-        .feature-content h2 {
-            font-size: 1.5rem;
+        .step-content {
+            padding: 1.5rem;
+        }
+        
+        .step-number {
+            font-size: 2.5rem;
+        }
+        
+        .step-content h3 {
+            font-size: 1.25rem;
         }
     }
 </style>
@@ -347,21 +516,18 @@
                 Connecting neighbors to help each other with grocery delivery. 
                 Safe, private, and free.
             </p>
-            
             <div class="hero-actions">
-                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-large">Get Started</a>
-                <a href="#how-it-works" class="btn btn-secondary btn-large">Learn More</a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Get Started</a>
+                <a href="#how-it-works" class="btn btn-secondary">Learn More</a>
             </div>
         </div>
-        
         <div class="hero-image">
-            <img src="{{ url_for('static', filename='images/showing-support.svg') }}" 
-                 alt="Community members helping each other">
+            <img src="{{ url_for('static', filename='images/showing-support.svg') }}" alt="Community members supporting each other">
         </div>
     </section>
     
     <!-- Trust Badges -->
-    <div class="trust-section">
+    <section class="trust-section">
         <div class="trust-badges">
             <div class="trust-badge">
                 <span class="trust-badge-icon">🔒</span>
@@ -372,76 +538,144 @@
                 <span>Vetted volunteers</span>
             </div>
             <div class="trust-badge">
-                <span class="trust-badge-icon">💰</span>
+                <span class="trust-badge-icon">🤝</span>
                 <span>100% free service</span>
             </div>
         </div>
-    </div>
+    </section>
     
-    <hr class="section-divider" id="how-it-works">
-    
-    <!-- Feature 1: For Recipients -->
-    <section class="feature-section">
-        <div class="feature-content">
-            <span class="feature-label">Para Ti · For You</span>
-            <h2>Need groceries delivered?</h2>
-            <p>
-                Place your order at your preferred store using their pickup option. 
-                Then post a request here with the pickup details. A trusted volunteer 
-                will pick up your groceries and bring them to your door—no questions asked.
-            </p>
+    <!-- How It Works Section -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="how-it-works-header">
+            <h2>How It Works</h2>
+            <p>Four simple steps to get groceries delivered safely to your door</p>
         </div>
         
-        <div class="feature-image">
-            <img src="{{ url_for('static', filename='images/shopping-app.svg') }}" 
-                 alt="Placing a grocery order on your phone">
+        <div class="steps-grid">
+            <!-- Step 1 -->
+            <div class="step-card">
+                <div class="step-visual bg-blue">
+                    <div class="step-icon blue">📝</div>
+                    <!-- Download "sign-up" from undraw.co with color #3b82f6 -->
+                    <img src="{{ url_for('static', filename='images/sign-up.svg') }}" alt="Person creating an account">
+                </div>
+                <div class="step-content">
+                    <div class="step-number blue">01</div>
+                    <h3>Register Securely</h3>
+                    <p>Create your account in minutes. Your address is encrypted and only shared with your assigned volunteer during active deliveries.</p>
+                </div>
+            </div>
+            
+            <!-- Step 2 -->
+            <div class="step-card">
+                <div class="step-visual bg-green">
+                    <div class="step-icon green">🛒</div>
+                    <img src="{{ url_for('static', filename='images/shopping-app.svg') }}" alt="Placing a grocery order">
+                </div>
+                <div class="step-content">
+                    <div class="step-number green">02</div>
+                    <h3>Place Your Order</h3>
+                    <p>Order groceries for pickup at your preferred store. No payment through our platform—you handle payment directly with the store.</p>
+                </div>
+            </div>
+            
+            <!-- Step 3 -->
+            <div class="step-card">
+                <div class="step-visual bg-purple">
+                    <div class="step-icon purple">🚗</div>
+                    <!-- Download "on-the-way" from undraw.co with color #8b5cf6 -->
+                    <img src="{{ url_for('static', filename='images/on-the-way.svg') }}" alt="Volunteer driving to pick up groceries">
+                </div>
+                <div class="step-content">
+                    <div class="step-number purple">03</div>
+                    <h3>Volunteer Picks Up</h3>
+                    <p>A vetted volunteer in your area claims your request and picks up your groceries from the store.</p>
+                </div>
+            </div>
+            
+            <!-- Step 4 -->
+            <div class="step-card">
+                <div class="step-visual bg-orange">
+                    <div class="step-icon orange">📦</div>
+                    <img src="{{ url_for('static', filename='images/package-arrived.svg') }}" alt="Package delivered to your door">
+                </div>
+                <div class="step-content">
+                    <div class="step-number orange">04</div>
+                    <h3>Delivered to You</h3>
+                    <p>Your groceries arrive at your door. Once delivered, your address is automatically hidden from the volunteer again.</p>
+                </div>
+            </div>
         </div>
     </section>
     
-    <!-- Feature 2: For Volunteers -->
-    <section class="feature-section reverse">
-        <div class="feature-content">
-            <span class="feature-label">Voluntarios · Volunteers</span>
-            <h2>Want to help your neighbors?</h2>
-            <p>
-                Sign up to become a volunteer. Browse delivery requests in your area, 
-                claim one that fits your schedule, pick up the groceries, and deliver them. 
-                It's a simple way to make a real difference in someone's day.
-            </p>
+    <!-- Local Resources Section -->
+    <section class="resources-section" id="resources">
+        <div class="resources-header">
+            <h2>Community Resources</h2>
+            <p>Additional support available in our community</p>
         </div>
         
-        <div class="feature-image">
-            <img src="{{ url_for('static', filename='images/package-arrived.svg') }}" 
-                 alt="Volunteer delivering groceries">
+        <div class="resources-grid">
+            <!-- Food Assistance -->
+            <div class="resource-card">
+                <div class="resource-icon">🍎</div>
+                <h3>Food Assistance</h3>
+                <p>Local food banks and pantries providing free groceries to those in need.</p>
+                <div class="resource-links">
+                    <a href="https://www.sacramentofoodbank.org/" target="_blank" rel="noopener">
+                        → Sacramento Food Bank
+                    </a>
+                    <a href="https://www.feedingamerica.org/find-your-local-foodbank" target="_blank" rel="noopener">
+                        → Find a Food Bank Near You
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Community Organizations -->
+            <div class="resource-card">
+                <div class="resource-icon">🤝</div>
+                <h3>Community Organizations</h3>
+                <p>Local groups working to support immigrant communities and promote solidarity.</p>
+                <div class="resource-links">
+                    <a href="https://www.norcalresist.org/" target="_blank" rel="noopener">
+                        → NorCal Resist
+                    </a>
+                    <a href="https://sacactnetwork.org/" target="_blank" rel="noopener">
+                        → Sacramento ACT
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Know Your Rights -->
+            <div class="resource-card">
+                <div class="resource-icon">⚖️</div>
+                <h3>Know Your Rights</h3>
+                <p>Important information about your rights and how to protect yourself and your family.</p>
+                <div class="resource-links">
+                    <a href="https://www.ilrc.org/red-cards" target="_blank" rel="noopener">
+                        → ILRC Red Cards
+                    </a>
+                    <a href="https://www.aclu.org/know-your-rights/immigrants-rights" target="_blank" rel="noopener">
+                        → ACLU: Immigrant Rights
+                    </a>
+                </div>
+            </div>
         </div>
     </section>
-    
-    <hr class="section-divider">
-    
-    <!-- No Fees Section -->
-    <div class="how-it-works-summary">
-        <h2>Sin Costo · No Fees</h2>
-        <p>
-            This platform is completely free for everyone. You pay for your groceries 
-            at the store (using their pickup option). We simply connect you with volunteers 
-            in your community who want to help.
-        </p>
-    </div>
     
     <!-- CTA Section -->
     <section class="cta-section">
-        <h2>¿Listo? · Ready to Join?</h2>
+        <h2>Join Our Community</h2>
         <div class="cta-grid">
             <div class="cta-card">
-                <h3>Necesito Ayuda</h3>
-                <p>Register to request grocery deliveries from volunteers in your area.</p>
-                <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Sign Up</a>
+                <h3>Need Groceries? <span style="font-weight: 400;">/ ¿Necesita comida?</span></h3>
+                <p>Sign up to receive free grocery delivery from vetted community volunteers.</p>
+                <a href="{{ url_for('auth.register') }}?role=recipient" class="btn btn-primary">Request Help</a>
             </div>
-            
             <div class="cta-card">
-                <h3>Quiero Ayudar</h3>
-                <p>Apply to become a volunteer and help deliver groceries to neighbors.</p>
-                <a href="{{ url_for('volunteer.apply') }}" class="btn btn-secondary">Volunteer</a>
+                <h3>Want to Help? <span style="font-weight: 400;">/ ¿Quiere ayudar?</span></h3>
+                <p>Become a volunteer and help deliver groceries to neighbors in your area.</p>
+                <a href="{{ url_for('auth.register') }}?role=volunteer" class="btn btn-secondary">Become a Volunteer</a>
             </div>
         </div>
     </section>
@@ -450,43 +684,43 @@
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const container = document.getElementById('animated-bg');
-    if (!container) return;
-    
-    // Blob configuration - colors and positions scattered across the page
-    const blobs = [
-        // Blues - scattered across left and center
-        { color: 'rgba(96, 165, 250, 0.45)', size: 400, x: 5, y: 30, delay: 0 },
-        { color: 'rgba(147, 197, 253, 0.4)', size: 350, x: 20, y: 60, delay: 2 },
-        { color: 'rgba(191, 219, 254, 0.45)', size: 450, x: 45, y: 25, delay: 4 },
-        { color: 'rgba(96, 165, 250, 0.35)', size: 380, x: 30, y: 80, delay: 6 },
-        { color: 'rgba(147, 197, 253, 0.4)', size: 420, x: 60, y: 55, delay: 8 },
+    // Create animated background blobs
+    function createBlobs() {
+        const bg = document.getElementById('animated-bg');
+        if (!bg) return;
         
-        // Warm tones - right side accents (boosted opacity)
-        { color: 'rgba(254, 205, 150, 0.5)', size: 380, x: 75, y: 20, delay: 3 },
-        { color: 'rgba(253, 186, 116, 0.45)', size: 350, x: 88, y: 50, delay: 5 },
-        { color: 'rgba(254, 215, 170, 0.45)', size: 400, x: 70, y: 75, delay: 7 },
+        const colors = [
+            'rgba(59, 130, 246, 0.15)',   // Blue
+            'rgba(249, 115, 22, 0.12)',    // Orange
+            'rgba(139, 92, 246, 0.1)',     // Purple
+            'rgba(34, 197, 94, 0.08)'      // Green
+        ];
         
-        // Additional light blues for depth
-        { color: 'rgba(191, 219, 254, 0.35)', size: 320, x: 10, y: 85, delay: 9 },
-        { color: 'rgba(147, 197, 253, 0.3)', size: 400, x: 50, y: 90, delay: 11 },
-    ];
+        for (let i = 0; i < 6; i++) {
+            const blob = document.createElement('div');
+            blob.className = 'blob';
+            blob.style.width = `${Math.random() * 400 + 200}px`;
+            blob.style.height = blob.style.width;
+            blob.style.left = `${Math.random() * 100}%`;
+            blob.style.top = `${Math.random() * 100}%`;
+            blob.style.background = colors[i % colors.length];
+            blob.style.animationDelay = `${Math.random() * -20}s`;
+            blob.style.animationDuration = `${20 + Math.random() * 10}s`;
+            bg.appendChild(blob);
+        }
+    }
     
-    blobs.forEach((config, index) => {
-        const blob = document.createElement('div');
-        blob.className = 'blob';
-        blob.style.cssText = `
-            width: ${config.size}px;
-            height: ${config.size}px;
-            background: ${config.color};
-            left: ${config.x}%;
-            top: ${config.y}%;
-            animation-delay: -${config.delay}s;
-            animation-duration: ${18 + (index % 5) * 2}s;
-        `;
-        container.appendChild(blob);
+    createBlobs();
+    
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
     });
-});
 </script>
 {% endblock %}
